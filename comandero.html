@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Menú Digital - Chulas Burgers</title>
+<style>
+  body { background-color: #121216; color: #f5f5f7; font-family: sans-serif; margin: 0; padding: 15px; }
+  h1 { text-align: center; color: #ffb74d; }
+  .grid-menu { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; margin-bottom: 80px; }
+  .card-prod { background: #1e1e24; border-radius: 8px; padding-bottom: 15px; text-align: center; border: 1px solid #333; }
+  
+  /* ESTANDARIZACIÓN DE IMÁGENES: PREVIENE PARPADEO Y TAMAÑOS DESIGUALES */
+  .img-prod { width: 100%; height: 160px; object-fit: cover; border-radius: 8px 8px 0 0; display: block; }
+  
+  .precio { color: #ff9800; font-size: 1.2rem; font-weight: bold; margin: 10px 0; }
+  .controles { display: flex; gap: 5px; padding: 0 10px; margin-bottom: 10px; }
+  .input-cant { width: 50px; padding: 8px; background: #111; color: #fff; border: 1px solid #444; border-radius: 4px; text-align: center; }
+  .input-nota { flex-grow: 1; padding: 8px; background: #111; color: #fff; border: 1px solid #444; border-radius: 4px; }
+  .btn-add { background: #8bc34a; color: #111; border: none; padding: 10px; width: 90%; border-radius: 5px; font-weight: bold; cursor: pointer; }
+  
+  .flotante-carrito { position: fixed; bottom: 20px; right: 20px; background: #03a9f4; color: #fff; padding: 15px 20px; border-radius: 30px; border: none; font-weight: bold; font-size: 1.1rem; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+  
+  .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; }
+  .modal-content { background: #2a2a35; padding: 20px; border-radius: 10px; width: 90%; max-width: 400px; border: 1px solid #ff9800; max-height: 90vh; overflow-y: auto; text-align: center;}
+  
+  .btn-modal { padding: 12px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; font-size: 1rem; }
+  .btn-confirm { background: #8bc34a; color: #111; }
+  .btn-close { background: #f44336; color: #fff; }
+  .btn-wa { background: #25D366; color: #fff; }
+  
+  .img-kirby { width: 100px; height: 100px; object-fit: contain; margin: 0 auto 10px; display: block; }
+  .transfer-box { border: 2px dashed #ff9800; padding: 10px; margin: 15px 0; border-radius: 8px; background: #111; }
+  .input-file { margin-top: 10px; color: #fff; }
+</style>
+</head>
+<body>
+
+<h1>🍔 Menú Chulas Burgers</h1>
+<div class="grid-menu" id="contenedor-menu">Cargando menú...</div>
+
+<button class="flotante-carrito" onclick="abrirCarrito()">🛒 Ver Pedido (<span id="contador-items">0</span>)</button>
+
+<!-- Modal Carrito (Al ingresar el pedido) -->
+<div id="modal-carrito" class="modal-overlay">
+  <div class="modal-content">
+    <!-- IMAGEN KIRBY 1 AQUÍ -->
+    <img src="imagenes/Kirby1.jpg" alt="Kirby" class="img-kirby">
+    <h2 style="margin-top:0;">🛒 Tu Pedido</h2>
+    <div id="lista-carrito" style="text-align: left; margin-bottom: 15px;"></div>
+    <h3 style="color:#8bc34a; text-align:right;">Total: $<span id="total-carrito">0.00</span></h3>
+    
+    <div class="transfer-box">
+      <p style="margin:5px 0; color:#ffb74d;">💳 <b>Pagos por Transferencia</b></p>
+      <p style="margin:5px 0; font-size:0.9rem;">Banco: BBVA<br>Tarjeta: <b>5678 9012 3456</b></p>
+      <input type="file" id="comprobante" class="input-file" accept="image/*">
+    </div>
+
+    <!-- SOLO PIDE NOMBRE -->
+    <div style="text-align: left; margin-bottom: 15px;">
+      <label style="font-size: 0.9rem; color:#ccc;">Ingresa tu Nombre:</label>
+      <input type="text" id="nombre-cliente" placeholder="Ej. Juan Pérez" style="width: 93%; padding: 10px; border-radius: 5px; border: 1px solid #444; background: #111; color: white; margin-top:5px;">
+    </div>
+
+    <button class="btn-modal btn-confirm" onclick="enviarPedido()">🚀 Confirmar y Finalizar Pedido</button>
+    <button class="btn-modal btn-close" onclick="document.getElementById('modal-carrito').style.display='none'">Regresar al Menú</button>
+  </div>
+</div>
+
+<!-- Modal Éxito (Confirmar tu pedido) -->
+<div id="modal-exito" class="modal-overlay">
+  <div class="modal-content">
+    <!-- IMAGEN KIRBY 3 AQUÍ -->
+    <img src="imagenes/kirby3.webp" alt="Kirby Celebrando" class="img-kirby">
+    <h2>¡Pedido Generado con Éxito! 🎉</h2>
+    <p style="font-size: 0.9rem; color: #ccc;">Tu orden ya está en nuestro sistema. Para que cocina comience a prepararlo, <b>necesitamos confirmar tu pago</b>.</p>
+    
+    <div style="background: #111; padding: 10px; border-radius: 5px; font-size: 0.85rem; text-align: left; margin-bottom: 15px;">
+      <p><b>Paso 1:</b> Realiza la transferencia.<br><b>Paso 2:</b> Guarda tu comprobante.<br><b>Paso 3:</b> Envíalo vía WhatsApp.</p>
+    </div>
+
+    <!-- BOTON WHATSAPP CON NUMERO SOLICITADO -->
+    <button class="btn-modal btn-wa" onclick="abrirWhatsApp()">📱 Enviar Comprobante por WhatsApp</button>
+    <button class="btn-modal btn-close" onclick="cerrarExito()">Cerrar esta ventana</button>
+  </div>
+</div>
+
+<script>
+// Base de datos local provisional por si falla el API, con los nombres y precios exactos requeridos.
+const menuBase = {
+  "Hamburguesas": [
+    { nombre: "Clásica", precio: 60, imagen: "clasica.jpg" },
+    { nombre: "Doble", precio: 80, imagen: "doble.jpeg" }
+  ],
+  "Hot Dogs": [
+    { nombre: "Hot Dog", precio: 30, imagen: "hot.jpg" },
+    { nombre: "Orden de Hot Dogs", precio: 75, imagen: "Ordenhot.jpg" }
+  ],
+  "Especialidades": [
+    { nombre: "Enchiladas", precio: 75, imagen: "enchiladas.jpeg" },
+    { nombre: "Chilaquiles", precio: 65, imagen: "chilaquiles.jpg" },
+    { nombre: "Club Sandwich", precio: 85, imagen: "club.jpg" },
+    { nombre: "Sincronizadas Mexa", precio: 85, imagen: "sincromexa.jpeg" },
+    { nombre: "Crepa Pizza", precio: 90, imagen: "sincrop.webp" }
+  ],
+  "Bebidas": [
+    { nombre: "Refrescos Varios", precio: 25, imagen: "refrescosvarios.jpeg" },
+    { nombre: "Coca Cola", precio: 25, imagen: "coca cola.jpeg" }
+  ]
+};
+
+let carrito = [];
+let ultimoPedido = "";
+
+function cargarMenu() {
+  fetch('/api/menu').then(r => r.json()).catch(() => menuBase).then(data => {
+    let html = "";
+    for (let cat in data) {
+      data[cat].forEach((p, idx) => {
+        if(p.disponible === false) return; // Ocultar bloqueados
+        let idFicticio = cat.charAt(0) + idx;
+        html += `
+          <div class="card-prod">
+            <img src="imagenes/${p.imagen}" class="img-prod" alt="${p.nombre}">
+            <h3 style="margin: 10px 0 0 0;">${p.nombre}</h3>
+            <p class="precio">$${p.precio.toFixed(2)}</p>
+            <div class="controles">
+              <input type="number" min="1" value="1" id="cant-${idFicticio}" class="input-cant">
+              <input type="text" placeholder="Notas (Ej. Sin cebolla)" id="nota-${idFicticio}" class="input-nota">
+            </div>
+            <button class="btn-add" onclick="addCarrito('${p.nombre}', ${p.precio}, '${idFicticio}')">Agregar a la orden</button>
+          </div>
+        `;
+      });
+    }
+    document.getElementById('contenedor-menu').innerHTML = html;
+  });
+}
+
+function addCarrito(nombre, precio, idElem) {
+  let cant = parseInt(document.getElementById(`cant-${idElem}`).value) || 1;
+  let notas = document.getElementById(`nota-${idElem}`).value;
+  carrito.push({ nombre, precio, cantidad: cant, subtotal: precio * cant, notas });
+  document.getElementById('contador-items').innerText = carrito.length;
+  document.getElementById(`cant-${idElem}`).value = 1;
+  document.getElementById(`nota-${idElem}`).value = '';
+  alert(`${cant}x ${nombre} agregado al pedido.`);
+}
+
+function abrirCarrito() {
+  if (carrito.length === 0) return alert("El carrito está vacío.");
+  let html = ""; let total = 0;
+  carrito.forEach((i, idx) => {
+    html += `<div style="display:flex; justify-content:space-between; border-bottom:1px solid #444; padding:5px 0;">
+      <div>${i.cantidad}x ${i.nombre} <br><small style="color:#aaa;">${i.notas}</small></div>
+      <div>$${i.subtotal.toFixed(2)} <button onclick="quitarItem(${idx})" style="background:red;color:white;border:none;border-radius:3px;cursor:pointer;">X</button></div>
+    </div>`;
+    total += i.subtotal;
+  });
+  document.getElementById('lista-carrito').innerHTML = html;
+  document.getElementById('total-carrito').innerText = total.toFixed(2);
+  document.getElementById('modal-carrito').style.display = 'flex';
+}
+
+function quitarItem(idx) { carrito.splice(idx, 1); abrirCarrito(); document.getElementById('contador-items').innerText = carrito.length; if(carrito.length===0) document.getElementById('modal-carrito').style.display='none'; }
+
+function enviarPedido() {
+  let nombre = document.getElementById('nombre-cliente').value;
+  if (!nombre) return alert("Por favor, ingresa tu nombre.");
+  
+  let total = carrito.reduce((sum, i) => sum + i.subtotal, 0);
+  let pedido = {
+    cliente: nombre, total: total, items: carrito, estado: 'Pendiente', 
+    fecha: new Date().toLocaleTimeString(), metodo: 'Transferencia'
+  };
+
+  // Aquí iría la lógica para subir la imagen y obtener URL (si usas backend)
+  // Por ahora mandamos el JSON
+  fetch('/api/pedidos', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(pedido) })
+  .catch(err => console.log("Guardado local mode"))
+  .finally(() => {
+    ultimoPedido = carrito.map(i => `${i.cantidad}x ${i.nombre}`).join(", ");
+    carrito = [];
+    document.getElementById('contador-items').innerText = "0";
+    document.getElementById('modal-carrito').style.display = 'none';
+    document.getElementById('modal-exito').style.display = 'flex';
+  });
+}
+
+function abrirWhatsApp() {
+  let txt = encodeURIComponent(`Hola, acabo de realizar un pedido a nombre de *${document.getElementById('nombre-cliente').value}*. \nMi orden es: ${ultimoPedido}\n\nAdjunto mi comprobante de pago.`);
+  window.open(`https://wa.me/52795696184?text=${txt}`, '_blank');
+}
+
+function cerrarExito() {
+  document.getElementById('modal-exito').style.display = 'none';
+  document.getElementById('nombre-cliente').value = '';
+}
+
+cargarMenu();
+</script>
+</body>
+</html>
