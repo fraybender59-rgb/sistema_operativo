@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     cargarCocina();
-    setInterval(cargarCocina, 1000); // Refresco de temporizadores cada segundo
+    setInterval(cargarCocina, 1000);
 });
 
 async function cargarCocina() {
@@ -8,7 +8,6 @@ async function cargarCocina() {
     if (!container) return;
 
     const todos = await obtenerPedidosSync();
-    // Se muestran pedidos en estado 'pendiente' o 'en_cocina' (no cobrados ni cerrados)
     const enCocina = todos.filter(p => p.estado === 'pendiente' || p.estado === 'en_cocina');
 
     if (enCocina.length === 0) {

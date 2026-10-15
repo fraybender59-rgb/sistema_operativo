@@ -21,11 +21,11 @@
             <h1>⚙️ Caja Maestro - Administración</h1>
         </header>
 
-        <!-- Botones Principales de Navegación Exactos -->
+        <!-- Botones Principales -->
         <div class="admin-top-grid">
             <a href="index.html" target="_blank" class="btn-nav-admin bg-publico">📱 Comandero Público</a>
             <a href="staff.html" target="_blank" class="btn-nav-admin bg-staff">📝 Comandero Staff</a>
-            <button onclick="alert('Módulo de Almacén desactivado para Mar y Sazón')" class="btn-nav-admin bg-almacen">📦 Almacén</button>
+            <button onclick="alert('Módulo de Almacén desactivado')" class="btn-nav-admin bg-almacen">📦 Almacén</button>
             <a href="cocina.html" target="_blank" class="btn-nav-admin bg-cocina">🧑‍🍳 Cocina</a>
             <button onclick="abrirModalCorte()" class="btn-nav-admin bg-corte">💰 Corte</button>
             <button onclick="abrirModalCobradas()" class="btn-nav-admin bg-cobradas">📁 Cobradas Hoy</button>
@@ -45,7 +45,7 @@
             <div id="lista-caja-abierta"></div>
         </div>
 
-        <!-- Ajustes de Sistema -->
+        <!-- Ajustes -->
         <div class="admin-card">
             <h3>⚙️ Ajustes del Sistema</h3>
             <button class="btn btn-warning" onclick="cambiarPassAdmin()">Cambiar Contraseña Admin</button><br><br>
@@ -70,7 +70,7 @@
         </div>
     </div>
 
-    <!-- Modales de Funciones -->
+    <!-- Modal Genérico -->
     <div id="modal-generic" class="modal hidden">
         <div class="modal-content">
             <h3 id="modal-gen-title">Modal</h3>

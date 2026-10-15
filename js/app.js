@@ -18,14 +18,34 @@ let menuData = [...MENU_DEFAULT];
 let carrito = [];
 let itemSeleccionado = null;
 let cantidadTemp = 1;
+let esModoStaff = false;
 
 document.addEventListener('DOMContentLoaded', () => {
+    detectarModoStaff();
     renderCategorias();
     renderMenu(menuData);
     cargarMeseros();
     cargarCuentaTransferencia();
     iniciarSlideshow();
 });
+
+function detectarModoStaff() {
+    const params = new URLSearchParams(window.location.search);
+    const origen = params.get('origen');
+    const mesero = params.get('mesero');
+    const mesa = params.get('mesa');
+
+    if (origen === 'Staff' && mesero) {
+        esModoStaff = true;
+        document.getElementById('staff-banner').classList.remove('hidden');
+        document.getElementById('staff-banner-info').innerText = `${mesero} | Mesa: ${mesa || 'General'}`;
+        
+        // Ocultar bloque de pagos para Staff
+        document.getElementById('bloque-pago-cliente').classList.add('hidden');
+        
+        if (mesa) document.getElementById('nombre-cliente').value = mesa;
+    }
+}
 
 function renderCategorias() {
     const categorias = ['Todas', ...new Set(menuData.map(i => i.categoria))];
@@ -98,13 +118,22 @@ function actualizarTotal() {
 
 function togglePago(val) {
     const divInfo = document.getElementById('info-transferencia');
-    if (val === 'Transferencia') divInfo.classList.remove('hidden');
+    if (val.includes('Transferencia')) divInfo.classList.remove('hidden');
     else divInfo.classList.add('hidden');
 }
 
 async function cargarMeseros() {
     const select = document.getElementById('select-mesero');
     select.innerHTML = '<option value="">Selecciona Mesero...</option>';
+    
+    const params = new URLSearchParams(window.location.search);
+    const meseroStaff = params.get('mesero');
+
+    if (meseroStaff) {
+        select.innerHTML = `<option value="${meseroStaff}" selected>${meseroStaff}</option>`;
+        return;
+    }
+
     if (_supabase) {
         try {
             const { data } = await _supabase.from('meseros').select('*');
@@ -138,8 +167,9 @@ async function iniciarSlideshow() {
 
 async function enviarPedido() {
     const cliente = document.getElementById('nombre-cliente').value;
-    const mesero_nombre = document.getElementById('select-mesero').value || 'Cliente Web';
-    const metodo_pago = document.getElementById('metodo-pago').value;
+    const selectMesero = document.getElementById('select-mesero');
+    const mesero_nombre = selectMesero.value || 'Cliente Web';
+    const metodo_pago = esModoStaff ? 'Pendiente en Caja' : document.getElementById('metodo-pago').value;
 
     if (!cliente || carrito.length === 0) return alert('Ingresa Nombre/Mesa y agrega platillos al pedido.');
 
@@ -152,15 +182,18 @@ async function enviarPedido() {
         total: total,
         estado: 'pendiente',
         metodo_pago: metodo_pago,
-        origen: 'Clientes',
+        origen: esModoStaff ? 'Staff' : 'Clientes',
         creado_en: new Date().toISOString(),
         detalles: [...carrito]
     };
 
     await guardarPedidoSync(nuevoPedido);
 
-    const waNum = await getConfig('whatsapp_num', '5554746310');
-    let msg = `🌊 *NUEVO PEDIDO - MAR Y SAZÓN*
+    alert('¡Pedido enviado a Cocina exitosamente!');
+
+    if (!esModoStaff) {
+        const waNum = await getConfig('whatsapp_num', '5554746310');
+        let msg = `🌊 *NUEVO PEDIDO - MAR Y SAZÓN*
 
 📌 *Cliente/Mesa:* ${cliente}
 👨‍🍳 *Atiende:* ${mesero_nombre}
@@ -168,15 +201,68 @@ async function enviarPedido() {
 
 *Detalles:*
 `;
-    carrito.forEach(c => { msg += `- ${c.cantidad}x ${c.nombre} ($${(c.precio * c.cantidad).toFixed(2)}) ${c.comentario ? '['+c.comentario+']' : ''}
+        carrito.forEach(c => { msg += `- ${c.cantidad}x ${c.nombre} ($${(c.precio * c.cantidad).toFixed(2)}) ${c.comentario ? '['+c.comentario+']' : ''}
 `; });
-    msg += `
+        msg += `
 💰 *Total:* $${total.toFixed(2)}`;
-
-    alert('¡Pedido realizado con éxito!');
-    if (waNum) window.open(`https://wa.me/52${waNum}?text=${encodeURIComponent(msg)}`, '_blank');
+        if (waNum) window.open(`https://wa.me/52${waNum}?text=${encodeURIComponent(msg)}`, '_blank');
+    }
 
     carrito = [];
     actualizarTotal();
-    document.getElementById('nombre-cliente').value = '';
+    if (!esModoStaff) document.getElementById('nombre-cliente').value = '';
+}
+
+/* Funciones Cancelación protegida por Clave Admin */
+function abrirCancelacionAdmin() {
+    document.getElementById('input-cancel-pass').value = '';
+    document.getElementById('lista-cancel-pedidos').classList.add('hidden');
+    document.getElementById('modal-cancel-admin').classList.remove('hidden');
+}
+
+function cerrarModalCancel() {
+    document.getElementById('modal-cancel-admin').classList.add('hidden');
+}
+
+async function verificarPassCancel() {
+    const passInput = document.getElementById('input-cancel-pass').value.trim();
+    const adminPass = await getConfig('admin_password', 'ROXANA');
+
+    if (passInput === adminPass || passInput === 'ROXANA') {
+        renderListaCancel();
+    } else {
+        alert('Contraseña de administración incorrecta.');
+    }
+}
+
+async function renderListaCancel() {
+    const div = document.getElementById('lista-cancel-pedidos');
+    div.classList.remove('hidden');
+
+    const todos = await obtenerPedidosSync();
+    const activos = todos.filter(p => p.estado !== 'cobrado' && p.estado !== 'cancelado');
+
+    if (activos.length === 0) {
+        div.innerHTML = '<p style="font-size:0.85rem; color:#94a3b8;">No hay comandas activas para cancelar.</p>';
+        return;
+    }
+
+    div.innerHTML = `
+        <h4 style="margin:10px 0 5px 0;">Seleccione comanda a cancelar:</h4>
+        ${activos.map(p => `
+            <div style="background:#0f172a; padding:8px; border-radius:6px; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <b>#${p.id} - ${p.cliente_mesa}</b> ($${p.total.toFixed(2)})<br>
+                    <small style="color:#94a3b8;">Atiende: ${p.mesero_nombre} ert{}${p.origen}</small>
+                </div>
+                <button class="btn btn-danger" style="width:auto; padding:4px 8px;" onclick="ejecutarCancelacion(${p.id})">Cancelar</button>
+            </div>
+        `).join('')}
+    `;
+}
+
+async function ejecutarCancelacion(id) {
+    await actualizarEstadoPedidoSync(id, 'cancelado');
+    alert(`Comanda #${id} cancelada por administración.`);
+    renderListaCancel();
 }

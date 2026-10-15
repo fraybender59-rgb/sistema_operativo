@@ -26,15 +26,20 @@ body {
 }
 
 header {
-    background: rgba(30, 41, 59, 0.95); padding: 15px; text-align: center;
+    background: rgba(30, 41, 59, 0.95); padding: 12px 15px; text-align: center;
     border-bottom: 2px solid var(--primary); position: sticky; top: 0; z-index: 10;
+}
+
+.staff-banner {
+    background: #f59e0b; color: #000; font-weight: bold; padding: 6px;
+    text-align: center; font-size: 0.85rem; border-bottom: 1px solid #d97706;
 }
 
 .categories { display: flex; gap: 8px; overflow-x: auto; padding: 10px 5px; }
 .cat-btn { background: #334155; color: #fff; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; white-space: nowrap; }
 .cat-btn.active { background: var(--primary); font-weight: bold; }
 
-.menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; padding: 15px; margin-bottom: 160px; }
+.menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; padding: 15px; margin-bottom: 170px; }
 .menu-card { background: var(--card); padding: 12px; border-radius: 12px; text-align: center; border: 1px solid #334155; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; }
 .menu-card .price { color: var(--accent); font-weight: bold; font-size: 1.1rem; margin-top: 8px; }
 
@@ -52,7 +57,6 @@ input, select, textarea { padding: 10px; border-radius: 6px; border: 1px solid #
 .qty-control { display: flex; align-items: center; justify-content: center; gap: 15px; margin: 10px 0; }
 .qty-btn { width: 42px; height: 42px; border-radius: 50%; font-size: 1.4rem; background: var(--primary); color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
-/* Grid Estilo Menú Botones de Administración */
 .admin-top-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
 .btn-nav-admin { padding: 12px; border-radius: 8px; border: none; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; font-size: 0.9rem; }
 
@@ -67,12 +71,10 @@ input, select, textarea { padding: 10px; border-radius: 6px; border: 1px solid #
 .bg-precios { background-color: #f97316; }
 .bg-tarjeta { background-color: #2563eb; }
 
-/* Pestañas de Caja Principal */
 .tab-container { display: flex; gap: 10px; margin-bottom: 12px; }
 .tab-btn { flex: 1; padding: 10px; background: #334155; border: none; color: white; font-weight: bold; border-radius: 6px; cursor: pointer; }
 .tab-btn.active { background: var(--accent); color: black; }
 
-/* Badges de Tiempo KDS */
 .timer-badge { padding: 4px 10px; border-radius: 12px; font-weight: bold; font-size: 0.85rem; display: inline-block; }
 .timer-green { background-color: #10b981; color: #000; }
 .timer-yellow { background-color: #f59e0b; color: #000; }

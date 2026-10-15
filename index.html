@@ -11,9 +11,16 @@
     <div id="bg-slideshow"></div>
     <div id="bg-overlay"></div>
 
+    <div id="staff-banner" class="staff-banner hidden">
+        👨‍🍳 MODO STAFF MESERO: <span id="staff-banner-info"></span>
+    </div>
+
     <header>
-        <h1>🌊 Mar y Sazón</h1>
-        <div class="categories" id="cat-container"></div>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h1 style="margin:0; font-size:1.3rem;">🌊 Mar y Sazón</h1>
+            <button class="btn btn-danger" style="width:auto; padding:6px 12px; font-size:0.8rem;" onclick="abrirCancelacionAdmin()">❌ Cancelar Comanda</button>
+        </div>
+        <div class="categories" id="cat-container" style="margin-top:8px;"></div>
     </header>
 
     <main class="menu-grid" id="menu-items"></main>
@@ -21,17 +28,23 @@
     <footer class="cart-footer">
         <input type="text" id="nombre-cliente" placeholder="Mesa / Nombre del Cliente">
         <select id="select-mesero"><option value="">Selecciona Mesero...</option></select>
-        <select id="metodo-pago" onchange="togglePago(this.value)">
-            <option value="Efectivo">Efectivo al recibir</option>
-            <option value="Transferencia">Transferencia bancaria</option>
-        </select>
-        <div id="info-transferencia" class="hidden" style="font-size: 0.85rem; color: #f59e0b; text-align: center;"></div>
-        <div style="display:flex; justify-content:space-between; align-items:center;">
+        
+        <!-- Bloque de Pago exclusivo para Clientes Públicos -->
+        <div id="bloque-pago-cliente">
+            <select id="metodo-pago" onchange="togglePago(this.value)">
+                <option value="Efectivo al recibir">Efectivo al recibir</option>
+                <option value="Transferencia bancaria">Transferencia bancaria</option>
+            </select>
+            <div id="info-transferencia" class="hidden" style="font-size: 0.85rem; color: #f59e0b; text-align: center; margin-top:4px;"></div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
             <span>Total: $<b id="total-price">0.00</b></span>
             <button class="btn btn-success" onclick="enviarPedido()" style="width: auto; padding: 10px 20px;">🚀 Pedir a Cocina</button>
         </div>
     </footer>
 
+    <!-- Modal Seleccionar Cantidad y Notas -->
     <div id="modal-item" class="modal hidden">
         <div class="modal-content">
             <h3 id="modal-title">Platillo</h3>
@@ -44,6 +57,18 @@
             <textarea id="modal-comment" rows="2" placeholder="Notas/Comentarios (Ej. Sin cebolla, picante aparte...)"></textarea>
             <button class="btn btn-success" onclick="agregarAlCarritoDesdeModal()">Agregar al Pedido</button>
             <button class="btn btn-danger" onclick="cerrarModal()">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- Modal Cancelación con Clave Admin -->
+    <div id="modal-cancel-admin" class="modal hidden">
+        <div class="modal-content">
+            <h3>🔒 Cancelación de Comandas</h3>
+            <p style="font-size:0.85rem; color:#94a3b8; margin:0;">Ingrese contraseña de administración para autorizar cancelación:</p>
+            <input type="password" id="input-cancel-pass" placeholder="Contraseña Admin">
+            <button class="btn btn-warning" onclick="verificarPassCancel()">Verificar Autorización</button>
+            <div id="lista-cancel-pedidos" class="hidden" style="margin-top:10px;"></div>
+            <button class="btn btn-danger" onclick="cerrarModalCancel()">Cerrar</button>
         </div>
     </div>
 

@@ -92,12 +92,11 @@ async function cancelarCuenta(id) {
     } else alert('Contraseña incorrecta.');
 }
 
-/* Modales de Botones de Arriba */
 function abrirModalCorte() {
     obtenerPedidosSync().then(todos => {
         const cobrados = todos.filter(p => p.estado === 'cobrado');
-        const totEfectivo = cobrados.filter(p => p.metodo_pago === 'Efectivo').reduce((sum, p) => sum + p.total, 0);
-        const totTransf = cobrados.filter(p => p.metodo_pago === 'Transferencia').reduce((sum, p) => sum + p.total, 0);
+        const totEfectivo = cobrados.filter(p => p.metodo_pago.includes('Efectivo')).reduce((sum, p) => sum + p.total, 0);
+        const totTransf = cobrados.filter(p => p.metodo_pago.includes('Transferencia')).reduce((sum, p) => sum + p.total, 0);
         const totalGen = totEfectivo + totTransf;
 
         showModalGen('💰 Corte de Caja Hoy', `

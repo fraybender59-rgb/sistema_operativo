@@ -31,15 +31,20 @@ body {
 }
 
 header {
-    background: rgba(30, 41, 59, 0.95); padding: 15px; text-align: center;
+    background: rgba(30, 41, 59, 0.95); padding: 12px 15px; text-align: center;
     border-bottom: 2px solid var(--primary); position: sticky; top: 0; z-index: 10;
+}
+
+.staff-banner {
+    background: #f59e0b; color: #000; font-weight: bold; padding: 6px;
+    text-align: center; font-size: 0.85rem; border-bottom: 1px solid #d97706;
 }
 
 .categories { display: flex; gap: 8px; overflow-x: auto; padding: 10px 5px; }
 .cat-btn { background: #334155; color: #fff; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; white-space: nowrap; }
 .cat-btn.active { background: var(--primary); font-weight: bold; }
 
-.menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; padding: 15px; margin-bottom: 160px; }
+.menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; padding: 15px; margin-bottom: 170px; }
 .menu-card { background: var(--card); padding: 12px; border-radius: 12px; text-align: center; border: 1px solid #334155; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; }
 .menu-card .price { color: var(--accent); font-weight: bold; font-size: 1.1rem; margin-top: 8px; }
 
@@ -57,7 +62,6 @@ input, select, textarea { padding: 10px; border-radius: 6px; border: 1px solid #
 .qty-control { display: flex; align-items: center; justify-content: center; gap: 15px; margin: 10px 0; }
 .qty-btn { width: 42px; height: 42px; border-radius: 50%; font-size: 1.4rem; background: var(--primary); color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
-/* Grid Estilo Menú Botones de Administración */
 .admin-top-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
 .btn-nav-admin { padding: 12px; border-radius: 8px; border: none; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; font-size: 0.9rem; }
 
@@ -72,12 +76,10 @@ input, select, textarea { padding: 10px; border-radius: 6px; border: 1px solid #
 .bg-precios { background-color: #f97316; }
 .bg-tarjeta { background-color: #2563eb; }
 
-/* Pestañas de Caja Principal */
 .tab-container { display: flex; gap: 10px; margin-bottom: 12px; }
 .tab-btn { flex: 1; padding: 10px; background: #334155; border: none; color: white; font-weight: bold; border-radius: 6px; cursor: pointer; }
 .tab-btn.active { background: var(--accent); color: black; }
 
-/* Badges de Tiempo KDS */
 .timer-badge { padding: 4px 10px; border-radius: 12px; font-weight: bold; font-size: 0.85rem; display: inline-block; }
 .timer-green { background-color: #10b981; color: #000; }
 .timer-yellow { background-color: #f59e0b; color: #000; }
@@ -94,7 +96,6 @@ if (window.supabase && window.supabase.createClient) {
     _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 }
 
-// Auxiliares de Sincronización Local + Remota
 function getPedidosLocales() {
     try {
         return JSON.parse(localStorage.getItem('mar_y_sazon_pedidos') || '[]');
@@ -112,7 +113,7 @@ async function guardarPedidoSync(pedido) {
 
     if (_supabase) {
         try {
-            const { data, error } = await _supabase.from('pedidos').insert([{
+            const { data } = await _supabase.from('pedidos').insert([{
                 cliente_mesa: pedido.cliente_mesa,
                 mesero_nombre: pedido.mesero_nombre,
                 total: pedido.total,
@@ -135,7 +136,7 @@ async function guardarPedidoSync(pedido) {
                 await _supabase.from('detalles_pedido').insert(detalles);
                 savePedidosLocales(pedidos);
             }
-        } catch(e) { console.warn('Guardado en respaldo local:', e); }
+        } catch(e) { console.warn('Respaldo local activo:', e); }
     }
 }
 
@@ -217,9 +218,16 @@ index_html = '''<!DOCTYPE html>
     <div id="bg-slideshow"></div>
     <div id="bg-overlay"></div>
 
+    <div id="staff-banner" class="staff-banner hidden">
+        👨‍🍳 MODO STAFF MESERO: <span id="staff-banner-info"></span>
+    </div>
+
     <header>
-        <h1>🌊 Mar y Sazón</h1>
-        <div class="categories" id="cat-container"></div>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h1 style="margin:0; font-size:1.3rem;">🌊 Mar y Sazón</h1>
+            <button class="btn btn-danger" style="width:auto; padding:6px 12px; font-size:0.8rem;" onclick="abrirCancelacionAdmin()">❌ Cancelar Comanda</button>
+        </div>
+        <div class="categories" id="cat-container" style="margin-top:8px;"></div>
     </header>
 
     <main class="menu-grid" id="menu-items"></main>
@@ -227,17 +235,23 @@ index_html = '''<!DOCTYPE html>
     <footer class="cart-footer">
         <input type="text" id="nombre-cliente" placeholder="Mesa / Nombre del Cliente">
         <select id="select-mesero"><option value="">Selecciona Mesero...</option></select>
-        <select id="metodo-pago" onchange="togglePago(this.value)">
-            <option value="Efectivo">Efectivo al recibir</option>
-            <option value="Transferencia">Transferencia bancaria</option>
-        </select>
-        <div id="info-transferencia" class="hidden" style="font-size: 0.85rem; color: #f59e0b; text-align: center;"></div>
-        <div style="display:flex; justify-content:space-between; align-items:center;">
+        
+        <!-- Bloque de Pago exclusivo para Clientes Públicos -->
+        <div id="bloque-pago-cliente">
+            <select id="metodo-pago" onchange="togglePago(this.value)">
+                <option value="Efectivo al recibir">Efectivo al recibir</option>
+                <option value="Transferencia bancaria">Transferencia bancaria</option>
+            </select>
+            <div id="info-transferencia" class="hidden" style="font-size: 0.85rem; color: #f59e0b; text-align: center; margin-top:4px;"></div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
             <span>Total: $<b id="total-price">0.00</b></span>
             <button class="btn btn-success" onclick="enviarPedido()" style="width: auto; padding: 10px 20px;">🚀 Pedir a Cocina</button>
         </div>
     </footer>
 
+    <!-- Modal Seleccionar Cantidad y Notas -->
     <div id="modal-item" class="modal hidden">
         <div class="modal-content">
             <h3 id="modal-title">Platillo</h3>
@@ -250,6 +264,18 @@ index_html = '''<!DOCTYPE html>
             <textarea id="modal-comment" rows="2" placeholder="Notas/Comentarios (Ej. Sin cebolla, picante aparte...)"></textarea>
             <button class="btn btn-success" onclick="agregarAlCarritoDesdeModal()">Agregar al Pedido</button>
             <button class="btn btn-danger" onclick="cerrarModal()">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- Modal Cancelación con Clave Admin -->
+    <div id="modal-cancel-admin" class="modal hidden">
+        <div class="modal-content">
+            <h3>🔒 Cancelación de Comandas</h3>
+            <p style="font-size:0.85rem; color:#94a3b8; margin:0;">Ingrese contraseña de administración para autorizar cancelación:</p>
+            <input type="password" id="input-cancel-pass" placeholder="Contraseña Admin">
+            <button class="btn btn-warning" onclick="verificarPassCancel()">Verificar Autorización</button>
+            <div id="lista-cancel-pedidos" class="hidden" style="margin-top:10px;"></div>
+            <button class="btn btn-danger" onclick="cerrarModalCancel()">Cerrar</button>
         </div>
     </div>
 
@@ -278,14 +304,34 @@ let menuData = [...MENU_DEFAULT];
 let carrito = [];
 let itemSeleccionado = null;
 let cantidadTemp = 1;
+let esModoStaff = false;
 
 document.addEventListener('DOMContentLoaded', () => {
+    detectarModoStaff();
     renderCategorias();
     renderMenu(menuData);
     cargarMeseros();
     cargarCuentaTransferencia();
     iniciarSlideshow();
 });
+
+function detectarModoStaff() {
+    const params = new URLSearchParams(window.location.search);
+    const origen = params.get('origen');
+    const mesero = params.get('mesero');
+    const mesa = params.get('mesa');
+
+    if (origen === 'Staff' && mesero) {
+        esModoStaff = true;
+        document.getElementById('staff-banner').classList.remove('hidden');
+        document.getElementById('staff-banner-info').innerText = `${mesero} | Mesa: ${mesa || 'General'}`;
+        
+        // Ocultar bloque de pagos para Staff
+        document.getElementById('bloque-pago-cliente').classList.add('hidden');
+        
+        if (mesa) document.getElementById('nombre-cliente').value = mesa;
+    }
+}
 
 function renderCategorias() {
     const categorias = ['Todas', ...new Set(menuData.map(i => i.categoria))];
@@ -358,13 +404,22 @@ function actualizarTotal() {
 
 function togglePago(val) {
     const divInfo = document.getElementById('info-transferencia');
-    if (val === 'Transferencia') divInfo.classList.remove('hidden');
+    if (val.includes('Transferencia')) divInfo.classList.remove('hidden');
     else divInfo.classList.add('hidden');
 }
 
 async function cargarMeseros() {
     const select = document.getElementById('select-mesero');
     select.innerHTML = '<option value="">Selecciona Mesero...</option>';
+    
+    const params = new URLSearchParams(window.location.search);
+    const meseroStaff = params.get('mesero');
+
+    if (meseroStaff) {
+        select.innerHTML = `<option value="${meseroStaff}" selected>${meseroStaff}</option>`;
+        return;
+    }
+
     if (_supabase) {
         try {
             const { data } = await _supabase.from('meseros').select('*');
@@ -398,8 +453,9 @@ async function iniciarSlideshow() {
 
 async function enviarPedido() {
     const cliente = document.getElementById('nombre-cliente').value;
-    const mesero_nombre = document.getElementById('select-mesero').value || 'Cliente Web';
-    const metodo_pago = document.getElementById('metodo-pago').value;
+    const selectMesero = document.getElementById('select-mesero');
+    const mesero_nombre = selectMesero.value || 'Cliente Web';
+    const metodo_pago = esModoStaff ? 'Pendiente en Caja' : document.getElementById('metodo-pago').value;
 
     if (!cliente || carrito.length === 0) return alert('Ingresa Nombre/Mesa y agrega platillos al pedido.');
 
@@ -412,24 +468,80 @@ async function enviarPedido() {
         total: total,
         estado: 'pendiente',
         metodo_pago: metodo_pago,
-        origen: 'Clientes',
+        origen: esModoStaff ? 'Staff' : 'Clientes',
         creado_en: new Date().toISOString(),
         detalles: [...carrito]
     };
 
     await guardarPedidoSync(nuevoPedido);
 
-    const waNum = await getConfig('whatsapp_num', '5554746310');
-    let msg = `🌊 *NUEVO PEDIDO - MAR Y SAZÓN*\n\n📌 *Cliente/Mesa:* ${cliente}\n👨‍🍳 *Atiende:* ${mesero_nombre}\n💳 *Pago:* ${metodo_pago}\n\n*Detalles:*\n`;
-    carrito.forEach(c => { msg += `- ${c.cantidad}x ${c.nombre} ($${(c.precio * c.cantidad).toFixed(2)}) ${c.comentario ? '['+c.comentario+']' : ''}\n`; });
-    msg += `\n💰 *Total:* $${total.toFixed(2)}`;
+    alert('¡Pedido enviado a Cocina exitosamente!');
 
-    alert('¡Pedido realizado con éxito!');
-    if (waNum) window.open(`https://wa.me/52${waNum}?text=${encodeURIComponent(msg)}`, '_blank');
+    if (!esModoStaff) {
+        const waNum = await getConfig('whatsapp_num', '5554746310');
+        let msg = `🌊 *NUEVO PEDIDO - MAR Y SAZÓN*\n\n📌 *Cliente/Mesa:* ${cliente}\n👨‍🍳 *Atiende:* ${mesero_nombre}\n💳 *Pago:* ${metodo_pago}\n\n*Detalles:*\n`;
+        carrito.forEach(c => { msg += `- ${c.cantidad}x ${c.nombre} ($${(c.precio * c.cantidad).toFixed(2)}) ${c.comentario ? '['+c.comentario+']' : ''}\n`; });
+        msg += `\n💰 *Total:* $${total.toFixed(2)}`;
+        if (waNum) window.open(`https://wa.me/52${waNum}?text=${encodeURIComponent(msg)}`, '_blank');
+    }
 
     carrito = [];
     actualizarTotal();
-    document.getElementById('nombre-cliente').value = '';
+    if (!esModoStaff) document.getElementById('nombre-cliente').value = '';
+}
+
+/* Funciones Cancelación protegida por Clave Admin */
+function abrirCancelacionAdmin() {
+    document.getElementById('input-cancel-pass').value = '';
+    document.getElementById('lista-cancel-pedidos').classList.add('hidden');
+    document.getElementById('modal-cancel-admin').classList.remove('hidden');
+}
+
+function cerrarModalCancel() {
+    document.getElementById('modal-cancel-admin').classList.add('hidden');
+}
+
+async function verificarPassCancel() {
+    const passInput = document.getElementById('input-cancel-pass').value.trim();
+    const adminPass = await getConfig('admin_password', 'ROXANA');
+
+    if (passInput === adminPass || passInput === 'ROXANA') {
+        renderListaCancel();
+    } else {
+        alert('Contraseña de administración incorrecta.');
+    }
+}
+
+async function renderListaCancel() {
+    const div = document.getElementById('lista-cancel-pedidos');
+    div.classList.remove('hidden');
+
+    const todos = await obtenerPedidosSync();
+    const activos = todos.filter(p => p.estado !== 'cobrado' && p.estado !== 'cancelado');
+
+    if (activos.length === 0) {
+        div.innerHTML = '<p style="font-size:0.85rem; color:#94a3b8;">No hay comandas activas para cancelar.</p>';
+        return;
+    }
+
+    div.innerHTML = `
+        <h4 style="margin:10px 0 5px 0;">Seleccione comanda a cancelar:</h4>
+        ${activos.map(p => `
+            <div style="background:#0f172a; padding:8px; border-radius:6px; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <b>#${p.id} - ${p.cliente_mesa}</b> ($${p.total.toFixed(2)})<br>
+                    <small style="color:#94a3b8;">Atiende: ${p.mesero_nombre} \vert{}${p.origen}</small>
+                </div>
+                <button class="btn btn-danger" style="width:auto; padding:4px 8px;" onclick="ejecutarCancelacion(${p.id})">Cancelar</button>
+            </div>
+        `).join('')}
+    `;
+}
+
+async function ejecutarCancelacion(id) {
+    await actualizarEstadoPedidoSync(id, 'cancelado');
+    alert(`Comanda #${id} cancelada por administración.`);
+    renderListaCancel();
 }
 '''
 
@@ -456,11 +568,11 @@ admin_html = '''<!DOCTYPE html>
             <h1>⚙️ Caja Maestro - Administración</h1>
         </header>
 
-        <!-- Botones Principales de Navegación Exactos -->
+        <!-- Botones Principales -->
         <div class="admin-top-grid">
             <a href="index.html" target="_blank" class="btn-nav-admin bg-publico">📱 Comandero Público</a>
             <a href="staff.html" target="_blank" class="btn-nav-admin bg-staff">📝 Comandero Staff</a>
-            <button onclick="alert('Módulo de Almacén desactivado para Mar y Sazón')" class="btn-nav-admin bg-almacen">📦 Almacén</button>
+            <button onclick="alert('Módulo de Almacén desactivado')" class="btn-nav-admin bg-almacen">📦 Almacén</button>
             <a href="cocina.html" target="_blank" class="btn-nav-admin bg-cocina">🧑‍🍳 Cocina</a>
             <button onclick="abrirModalCorte()" class="btn-nav-admin bg-corte">💰 Corte</button>
             <button onclick="abrirModalCobradas()" class="btn-nav-admin bg-cobradas">📁 Cobradas Hoy</button>
@@ -480,7 +592,7 @@ admin_html = '''<!DOCTYPE html>
             <div id="lista-caja-abierta"></div>
         </div>
 
-        <!-- Ajustes de Sistema -->
+        <!-- Ajustes -->
         <div class="admin-card">
             <h3>⚙️ Ajustes del Sistema</h3>
             <button class="btn btn-warning" onclick="cambiarPassAdmin()">Cambiar Contraseña Admin</button><br><br>
@@ -505,7 +617,7 @@ admin_html = '''<!DOCTYPE html>
         </div>
     </div>
 
-    <!-- Modales de Funciones -->
+    <!-- Modal Genérico -->
     <div id="modal-generic" class="modal hidden">
         <div class="modal-content">
             <h3 id="modal-gen-title">Modal</h3>
@@ -613,12 +725,11 @@ async function cancelarCuenta(id) {
     } else alert('Contraseña incorrecta.');
 }
 
-/* Modales de Botones de Arriba */
 function abrirModalCorte() {
     obtenerPedidosSync().then(todos => {
         const cobrados = todos.filter(p => p.estado === 'cobrado');
-        const totEfectivo = cobrados.filter(p => p.metodo_pago === 'Efectivo').reduce((sum, p) => sum + p.total, 0);
-        const totTransf = cobrados.filter(p => p.metodo_pago === 'Transferencia').reduce((sum, p) => sum + p.total, 0);
+        const totEfectivo = cobrados.filter(p => p.metodo_pago.includes('Efectivo')).reduce((sum, p) => sum + p.total, 0);
+        const totTransf = cobrados.filter(p => p.metodo_pago.includes('Transferencia')).reduce((sum, p) => sum + p.total, 0);
         const totalGen = totEfectivo + totTransf;
 
         showModalGen('💰 Corte de Caja Hoy', `
@@ -784,14 +895,11 @@ staff_html = '''<!DOCTYPE html>
             <h3>Identificación de Mesero</h3>
             <select id="staff-select-mesero"><option value="">Selecciona tu Nombre...</option></select>
             <input type="password" id="staff-pass" placeholder="Contraseña Mesero" style="margin-top:8px;">
-            <button class="btn btn-success" onclick="loginStaff()" style="margin-top:8px;">Ingresar a Tomar Pedidos</button>
+            <input type="text" id="staff-cliente" placeholder="Mesa / Nombre del Cliente" style="margin-top:8px;">
+            <button class="btn btn-success" onclick="ingresarMenuStaff()" style="margin-top:12px;">Ingresar al Menú de Mesero</button>
         </div>
 
-        <div id="staff-orders-section" class="admin-card hidden">
-            <h3>📝 Tomar Nuevo Pedido</h3>
-            <input type="text" id="staff-cliente" placeholder="Mesa / Nombre del Cliente">
-            <button class="btn" style="margin-top:8px;" onclick="irAComanderoStaff()">Ir al Menú de Mesero</button>
-            <hr>
+        <div id="staff-orders-section" class="admin-card">
             <h3>Comandas de Mis Mesas</h3>
             <div id="staff-pedidos-list"></div>
         </div>
@@ -816,39 +924,34 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch(e){}
     }
     select.innerHTML += '<option value="Luis">Luis</option><option value="Ana">Ana</option>';
+    cargarPedidosStaffGral();
 });
 
-function loginStaff() {
+function ingresarMenuStaff() {
     const select = document.getElementById('staff-select-mesero');
     const name = select.value;
     const pass = document.getElementById('staff-pass').value;
+    const mesa = document.getElementById('staff-cliente').value;
 
-    if (name && (pass === '1234' || pass !== '')) {
-        meseroActual = name;
-        document.getElementById('staff-orders-section').classList.remove('hidden');
-        cargarPedidosStaff();
-    } else { alert('Selecciona mesero e ingresa clave.'); }
+    if (!name || !pass || !mesa) return alert('Por favor selecciona Mesero, Contraseña y Mesa/Cliente.');
+
+    // Redirigir directamente al menú en Modo Staff sin forma de pago
+    window.location.href = `index.html?origen=Staff&mesero=${encodeURIComponent(name)}&mesa=${encodeURIComponent(mesa)}`;
 }
 
-function irAComanderoStaff() {
-    const cli = document.getElementById('staff-cliente').value;
-    if (!cli) return alert('Ingresa Nombre o Mesa.');
-    window.location.href = `index.html?mesero=${encodeURIComponent(meseroActual)}&mesa=${encodeURIComponent(cli)}`;
-}
-
-async function cargarPedidosStaff() {
+async function cargarPedidosStaffGral() {
     const list = document.getElementById('staff-pedidos-list');
     const todos = await obtenerPedidosSync();
-    const misPedidos = todos.filter(p => p.mesero_nombre === meseroActual && p.estado !== 'cobrado' && p.estado !== 'cancelado');
+    const staffPedidos = todos.filter(p => p.origen === 'Staff' && p.estado !== 'cobrado' && p.estado !== 'cancelado');
 
-    if (misPedidos.length === 0) {
-        list.innerHTML = '<p style="color:#94a3b8;">Sin comandas activas.</p>';
+    if (staffPedidos.length === 0) {
+        list.innerHTML = '<p style="color:#94a3b8; font-size:0.85rem;">Sin comandas activas de staff.</p>';
         return;
     }
 
-    list.innerHTML = misPedidos.map(p => `
+    list.innerHTML = staffPedidos.map(p => `
         <div style="background:#0f172a; padding:10px; margin-bottom:8px; border-radius:6px;">
-            <b>#${p.id} - ${p.cliente_mesa}</b> | Total: $${p.total.toFixed(2)} | Estado: <b>${p.estado}</b><br>
+            <b>#${p.id} - ${p.cliente_mesa}</b> | Total: $${p.total.toFixed(2)} | Atiende: <b>${p.mesero_nombre}</b><br>
             <button class="btn btn-danger" style="margin-top:5px; padding:4px;" onclick="cancelarStaff(${p.id})">Cancelar Pedido</button>
         </div>
     `).join('');
@@ -860,7 +963,7 @@ async function cancelarStaff(id) {
     if (p === adminPass || p === 'ROXANA') {
         await actualizarEstadoPedidoSync(id, 'cancelado');
         alert('Pedido cancelado.');
-        cargarPedidosStaff();
+        cargarPedidosStaffGral();
     } else alert('Contraseña de administración incorrecta.');
 }
 '''
@@ -888,7 +991,7 @@ cocina_html = '''<!DOCTYPE html>
 
 cocina_js = '''document.addEventListener('DOMContentLoaded', () => {
     cargarCocina();
-    setInterval(cargarCocina, 1000); // Refresco de temporizadores cada segundo
+    setInterval(cargarCocina, 1000);
 });
 
 async function cargarCocina() {
@@ -896,7 +999,6 @@ async function cargarCocina() {
     if (!container) return;
 
     const todos = await obtenerPedidosSync();
-    // Se muestran pedidos en estado 'pendiente' o 'en_cocina' (no cobrados ni cerrados)
     const enCocina = todos.filter(p => p.estado === 'pendiente' || p.estado === 'en_cocina');
 
     if (enCocina.length === 0) {
@@ -959,4 +1061,4 @@ with open('js/admin.js', 'w') as f: f.write(admin_js)
 with open('js/staff.js', 'w') as f: f.write(staff_js)
 with open('js/cocina.js', 'w') as f: f.write(cocina_js)
 
-print("SISTEMA_KDS_GENERADO_EXITOSAMENTE")
+print("ARCHIVOS_SISTEMA_MAR_Y_SAZON_ACTUALIZADOS")

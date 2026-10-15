@@ -6,7 +6,6 @@ if (window.supabase && window.supabase.createClient) {
     _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 }
 
-// Auxiliares de Sincronización Local + Remota
 function getPedidosLocales() {
     try {
         return JSON.parse(localStorage.getItem('mar_y_sazon_pedidos') || '[]');
@@ -24,7 +23,7 @@ async function guardarPedidoSync(pedido) {
 
     if (_supabase) {
         try {
-            const { data, error } = await _supabase.from('pedidos').insert([{
+            const { data } = await _supabase.from('pedidos').insert([{
                 cliente_mesa: pedido.cliente_mesa,
                 mesero_nombre: pedido.mesero_nombre,
                 total: pedido.total,
@@ -47,7 +46,7 @@ async function guardarPedidoSync(pedido) {
                 await _supabase.from('detalles_pedido').insert(detalles);
                 savePedidosLocales(pedidos);
             }
-        } catch(e) { console.warn('Guardado en respaldo local:', e); }
+        } catch(e) { console.warn('Respaldo local activo:', e); }
     }
 }
 
