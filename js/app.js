@@ -1,6 +1,3 @@
-cat << 'EOF' > js/app.js
-import { supabase, getConfig } from './supabase.js';
-
 const MENU_DEFAULT = [
     { id: 1, categoria: 'Cócteles', nombre: 'Cóctel de Camarón Grande', descripcion: 'Cóctel grande preparado con camarón fresco', precio: 150.00 },
     { id: 2, categoria: 'Cócteles', nombre: 'Cóctel camaron chico', descripcion: 'Cóctel chico de camarón fresco', precio: 120.00 },
@@ -23,46 +20,34 @@ let itemSeleccionado = null;
 let cantidadTemp = 1;
 
 document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('metodo-pago').addEventListener('change', (e) => {
-        const divInfo = document.getElementById('info-transferencia');
-        if (e.target.value === 'Transferencia') divInfo.classList.remove('hidden');
-        else divInfo.classList.add('hidden');
-    });
-
-    document.getElementById('btn-plus').addEventListener('click', () => { cantidadTemp++; document.getElementById('modal-qty').innerText = cantidadTemp; });
-    document.getElementById('btn-minus').addEventListener('click', () => { if (cantidadTemp > 1) cantidadTemp--; document.getElementById('modal-qty').innerText = cantidadTemp; });
-    document.getElementById('btn-close-modal').addEventListener('click', () => document.getElementById('modal-item').classList.add('hidden'));
-    document.getElementById('btn-add-modal').addEventListener('click', agregarAlCarritoDesdeModal);
-    document.getElementById('btn-enviar-pedido').addEventListener('click', enviarPedido);
-
     renderCategorias();
     renderMenu(menuData);
-
-    iniciarSlideshow();
-    cargarMenuAsync();
-    cargarMeserosAsync();
+    cargarMeseros();
     cargarCuentaTransferencia();
+    iniciarSlideshow();
 });
 
 function renderCategorias() {
     const categorias = ['Todas', ...new Set(menuData.map(i => i.categoria))];
     const catContainer = document.getElementById('cat-container');
+    if (!catContainer) return;
     catContainer.innerHTML = categorias.map((cat, idx) => `
-        <button class="cat-btn ${idx === 0 ? 'active' : ''}" onclick="window.filtrarCat('${cat}', this)">${cat}</button>
+        <button class="cat-btn ${idx === 0 ? 'active' : ''}" onclick="filtrarCat('${cat}', this)">${cat}</button>
     `).join('');
 }
 
-window.filtrarCat = (cat, btn) => {
+function filtrarCat(cat, btn) {
     document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     if (cat === 'Todas') renderMenu(menuData);
     else renderMenu(menuData.filter(i => i.categoria === cat));
-};
+}
 
 function renderMenu(items) {
     const grid = document.getElementById('menu-items');
+    if (!grid) return;
     grid.innerHTML = items.map(item => `
-        <div class="menu-card" onclick="window.abrirModal(${item.id})">
+        <div class="menu-card" onclick="abrirModal(${item.id})">
             <div>
                 <h3>${item.nombre}</h3>
                 <p style="font-size:0.8rem; color:#94a3b8; margin: 4px 0;">${item.descripcion || ''}</p>
@@ -72,7 +57,7 @@ function renderMenu(items) {
     `).join('');
 }
 
-window.abrirModal = (id) => {
+function abrirModal(id) {
     itemSeleccionado = menuData.find(i => i.id === id);
     if (!itemSeleccionado) return;
     cantidadTemp = 1;
@@ -81,7 +66,18 @@ window.abrirModal = (id) => {
     document.getElementById('modal-qty').innerText = 1;
     document.getElementById('modal-comment').value = '';
     document.getElementById('modal-item').classList.remove('hidden');
-};
+}
+
+function cambiarCantidad(delta) {
+    if (cantidadTemp + delta >= 1) {
+        cantidadTemp += delta;
+        document.getElementById('modal-qty').innerText = cantidadTemp;
+    }
+}
+
+function cerrarModal() {
+    document.getElementById('modal-item').classList.add('hidden');
+}
 
 function agregarAlCarritoDesdeModal() {
     const comentario = document.getElementById('modal-comment').value;
@@ -92,7 +88,7 @@ function agregarAlCarritoDesdeModal() {
         comentario
     });
     actualizarTotal();
-    document.getElementById('modal-item').classList.add('hidden');
+    cerrarModal();
 }
 
 function actualizarTotal() {
@@ -100,32 +96,25 @@ function actualizarTotal() {
     document.getElementById('total-price').innerText = total.toFixed(2);
 }
 
-async function cargarMenuAsync() {
-    try {
-        const { data } = await supabase.from('menu').select('*');
-        if (data && data.length > 0) {
-            menuData = data;
-            renderCategorias();
-            renderMenu(menuData);
-        }
-    } catch (e) {
-        console.warn('Usando menú inicial');
-    }
+function togglePago(val) {
+    const divInfo = document.getElementById('info-transferencia');
+    if (val === 'Transferencia') divInfo.classList.remove('hidden');
+    else divInfo.classList.add('hidden');
 }
 
-async function cargarMeserosAsync() {
+async function cargarMeseros() {
     const select = document.getElementById('select-mesero');
-    try {
-        const { data } = await supabase.from('meseros').select('*');
-        if (data && data.length > 0) {
-            select.innerHTML = '<option value="">Selecciona Mesero...</option>';
-            data.forEach(m => select.innerHTML += `<option value="${m.id}">${m.nombre}</option>`);
-        } else {
-            select.innerHTML = '<option value="1">Mesero General</option>';
-        }
-    } catch (e) {
-        select.innerHTML = '<option value="1">Mesero General</option>';
+    select.innerHTML = '<option value="">Selecciona Mesero...</option>';
+    if (_supabase) {
+        try {
+            const { data } = await _supabase.from('meseros').select('*');
+            if (data && data.length > 0) {
+                data.forEach(m => select.innerHTML += `<option value="${m.id}">${m.nombre}</option>`);
+                return;
+            }
+        } catch(e){}
     }
+    select.innerHTML += '<option value="1">Mesero General</option>';
 }
 
 async function cargarCuentaTransferencia() {
@@ -156,27 +145,37 @@ async function enviarPedido() {
 
     const total = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
 
-    try {
-        const { data: pedidoData } = await supabase.from('pedidos')
-            .insert([{ cliente_mesa: cliente, mesero_id: mesero_id || null, total, metodo_pago, estado: 'pendiente' }]).select();
+    if (_supabase) {
+        try {
+            const { data: pedidoData } = await _supabase.from('pedidos')
+                .insert([{ cliente_mesa: cliente, mesero_id: mesero_id || null, total, metodo_pago, estado: 'pendiente' }]).select();
 
-        if (pedidoData && pedidoData.length > 0) {
-            const pedidoId = pedidoData[0].id;
-            const detalles = carrito.map(i => ({
-                pedido_id: pedidoId,
-                producto_nombre: i.nombre,
-                precio: i.precio,
-                cantidad: i.cantidad,
-                comentario: i.comentario
-            }));
-            await supabase.from('detalles_pedido').insert(detalles);
-        }
-    } catch (e) {}
+            if (pedidoData && pedidoData.length > 0) {
+                const pedidoId = pedidoData[0].id;
+                const detalles = carrito.map(i => ({
+                    pedido_id: pedidoId,
+                    producto_nombre: i.nombre,
+                    precio: i.precio,
+                    cantidad: i.cantidad,
+                    comentario: i.comentario
+                }));
+                await _supabase.from('detalles_pedido').insert(detalles);
+            }
+        } catch (e) {}
+    }
 
     const waNum = await getConfig('whatsapp_num', '5554746310');
-    let msg = `🌊 *NUEVO PEDIDO - MAR Y SAZÓN*\n\n📌 *Cliente/Mesa:* ${cliente}\n💳 *Pago:* ${metodo_pago}\n\n*Detalles:*\n`;
-    carrito.forEach(c => { msg += `- ${c.cantidad}x ${c.nombre} ($${(c.precio * c.cantidad).toFixed(2)}) ${c.comentario ? '['+c.comentario+']' : ''}\n`; });
-    msg += `\n💰 *Total:* $${total.toFixed(2)}`;
+    let msg = `🌊 *NUEVO PEDIDO - MAR Y SAZÓN*
+
+📌 *Cliente/Mesa:* ${cliente}
+💳 *Pago:* ${metodo_pago}
+
+*Detalles:*
+`;
+    carrito.forEach(c => { msg += `- ${c.cantidad}x ${c.nombre} ($${(c.precio * c.cantidad).toFixed(2)}) ${c.comentario ? '['+c.comentario+']' : ''}
+`; });
+    msg += `
+💰 *Total:* $${total.toFixed(2)}`;
 
     alert('¡Pedido realizado con éxito!');
     if (waNum) window.open(`https://wa.me/52${waNum}?text=${encodeURIComponent(msg)}`, '_blank');
@@ -185,4 +184,3 @@ async function enviarPedido() {
     actualizarTotal();
     document.getElementById('nombre-cliente').value = '';
 }
-EOF

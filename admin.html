@@ -1,4 +1,3 @@
-cat << 'EOF' > admin.html
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -6,13 +5,14 @@ cat << 'EOF' > admin.html
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Administración - Mar y Sazón</title>
     <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
     <div id="admin-login-modal" class="modal">
         <div class="modal-content">
             <h3>🔒 Acceso Restringido</h3>
             <input type="password" id="admin-pass-input" placeholder="Contraseña Admin">
-            <button class="btn btn-success" id="btn-admin-login">Ingresar</button>
+            <button class="btn btn-success" onclick="loginAdmin()">Ingresar</button>
         </div>
     </div>
 
@@ -23,14 +23,14 @@ cat << 'EOF' > admin.html
 
         <div class="admin-card">
             <h3>🔑 Configuración General</h3>
-            <button class="btn btn-warning" id="btn-change-pass">Cambiar Contraseña Admin</button><br><br>
-            <button class="btn" id="btn-change-wa">Cambiar WhatsApp Recepción</button><br><br>
-            <button class="btn" id="btn-change-bank">Cambiar Cuenta Transferencia</button>
+            <button class="btn btn-warning" onclick="cambiarPassAdmin()">Cambiar Contraseña Admin</button><br><br>
+            <button class="btn" onclick="cambiarWhatsApp()">Cambiar WhatsApp Recepción</button><br><br>
+            <button class="btn" onclick="cambiarCuentaBanco()">Cambiar Cuenta Transferencia</button>
         </div>
 
         <div class="admin-card">
             <h3>🖼️ Fondo de Clientes (Carrusel)</h3>
-            <input type="file" id="slideshow-input" accept="image/*">
+            <input type="file" id="slideshow-input" accept="image/*" onchange="subirImagenFondo(event)">
             <div id="slideshow-preview" style="display:flex; gap:8px; overflow-x:auto; margin-top:10px;"></div>
         </div>
 
@@ -39,7 +39,7 @@ cat << 'EOF' > admin.html
             <input type="text" id="mesero-nombre" placeholder="Nombre Mesero">
             <input type="password" id="mesero-pass" placeholder="Contraseña Mesero" style="margin-top:6px;">
             <input type="text" id="mesero-mesa" placeholder="Mesas Asignadas (Ej. Mesa 1)" style="margin-top:6px;">
-            <button class="btn btn-success" id="btn-add-mesero" style="margin-top:8px;">Agregar / Guardar Mesero</button>
+            <button class="btn btn-success" onclick="agregarMesero()" style="margin-top:8px;">Agregar / Guardar Mesero</button>
             <ul id="lista-meseros" style="list-style:none; padding:0; margin-top:10px;"></ul>
         </div>
 
@@ -49,7 +49,7 @@ cat << 'EOF' > admin.html
         </div>
     </div>
 
-    <script type="module" src="js/admin.js"></script>
+    <script src="js/supabase_config.js"></script>
+    <script src="js/admin.js"></script>
 </body>
 </html>
-EOF

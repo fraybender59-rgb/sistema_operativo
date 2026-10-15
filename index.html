@@ -1,4 +1,3 @@
-cat << 'EOF' > index.html
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -6,6 +5,7 @@ cat << 'EOF' > index.html
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mar y Sazón - Menú</title>
     <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
     <div id="bg-slideshow"></div>
@@ -21,34 +21,33 @@ cat << 'EOF' > index.html
     <footer class="cart-footer">
         <input type="text" id="nombre-cliente" placeholder="Mesa / Nombre del Cliente">
         <select id="select-mesero"><option value="">Selecciona Mesero...</option></select>
-        <select id="metodo-pago">
+        <select id="metodo-pago" onchange="togglePago(this.value)">
             <option value="Efectivo">Efectivo al recibir</option>
             <option value="Transferencia">Transferencia bancaria</option>
         </select>
         <div id="info-transferencia" class="hidden" style="font-size: 0.85rem; color: #f59e0b; text-align: center;"></div>
         <div style="display:flex; justify-content:space-between; align-items:center;">
             <span>Total: $<b id="total-price">0.00</b></span>
-            <button class="btn btn-success" id="btn-enviar-pedido" style="width: auto; padding: 10px 20px;">🚀 Pedir a Cocina</button>
+            <button class="btn btn-success" onclick="enviarPedido()" style="width: auto; padding: 10px 20px;">🚀 Pedir a Cocina</button>
         </div>
     </footer>
 
-    <!-- Modal Selector de Cantidad y Notas -->
     <div id="modal-item" class="modal hidden">
         <div class="modal-content">
             <h3 id="modal-title">Platillo</h3>
             <p id="modal-desc" style="color: #94a3b8; font-size: 0.85rem; margin:0;"></p>
             <div class="qty-control">
-                <button class="qty-btn" id="btn-minus">-</button>
+                <button class="qty-btn" onclick="cambiarCantidad(-1)">-</button>
                 <span id="modal-qty" style="font-size: 1.5rem; font-weight: bold;">1</span>
-                <button class="qty-btn" id="btn-plus">+</button>
+                <button class="qty-btn" onclick="cambiarCantidad(1)">+</button>
             </div>
             <textarea id="modal-comment" rows="2" placeholder="Notas/Comentarios (Ej. Sin cebolla, picante aparte...)"></textarea>
-            <button class="btn btn-success" id="btn-add-modal">Agregar al Pedido</button>
-            <button class="btn btn-danger" id="btn-close-modal">Cancelar</button>
+            <button class="btn btn-success" onclick="agregarAlCarritoDesdeModal()">Agregar al Pedido</button>
+            <button class="btn btn-danger" onclick="cerrarModal()">Cancelar</button>
         </div>
     </div>
 
-    <script type="module" src="js/app.js"></script>
+    <script src="js/supabase_config.js"></script>
+    <script src="js/app.js"></script>
 </body>
 </html>
-EOF
