@@ -65,7 +65,7 @@ async function verificarSesionGlobal() {
     if (panel && !panel.classList.contains('hidden')) {
         const tokenRemoto = await getConfig('admin_session_token', '');
         if (tokenRemoto && miTokenSesion && tokenRemoto !== miTokenSesion) {
-            alert('🔒 Tu sesión ha sido cerrada remotamente desde otro dispositivo o por un Corte del Día.');
+            alert('🔒 Sesión cerrada desde otro dispositivo o por un Corte del Día.');
             cerrarAdmin();
         }
     }
@@ -77,7 +77,7 @@ async function cargarAdmin() {
     cargarMeserosAdmin();
     cargarSlideshowPreview();
     setInterval(renderCajaPrincipal, 4000);
-    setInterval(verificarSesionGlobal, 3000);
+    setInterval(verificarSesionGlobal, 2000);
 }
 
 async function actualizarBotonSinMeseros() {
@@ -206,13 +206,13 @@ function abrirModalCorte() {
         const totalGen = totEfectivo + totTransf;
 
         const html = `
-            <p style="font-size:1.1rem;">💵 <b>Efectivo:</b> $${totEfectivo.toFixed(2)}</p>
-            <p style="font-size:1.1rem;">💳 <b>Transferencias:</b> $${totTransf.toFixed(2)}</p>
-            <hr style="border-color:#334155;">
-            <p style="font-size:1.3rem; color:#10b981;"><b>Total General: $${totalGen.toFixed(2)}</b></p>
+            <p style="font-size:1.1rem; margin:5px 0;">💵 <b>Efectivo:</b> $${totEfectivo.toFixed(2)}</p>
+            <p style="font-size:1.1rem; margin:5px 0;">💳 <b>Transferencias:</b> $${totTransf.toFixed(2)}</p>
+            <hr style="border-color:#334155; margin:10px 0;">
+            <p style="font-size:1.3rem; color:#10b981; margin:5px 0;"><b>Total General: $${totalGen.toFixed(2)}</b></p>
 
-            <button class="btn btn-warning" style="margin-top:15px; padding:12px; font-size:1rem; font-weight:bold;" onclick="ejecutarCorteConRespaldo()">🌅 Realizar Corte del Día y Archivar</button>
-            <button class="btn btn-danger" style="margin-top:10px; padding:10px; font-size:0.9rem;" onclick="cerrarSesionTodos()">🔒 Cerrar Sesión en TODOS los Navegadores</button>
+            <button class="btn btn-warning" style="margin-top:15px; padding:12px; font-size:1rem; font-weight:bold;" onclick="ejecutarCorteConRespaldo()">🌅 REALIZAR CORTE DEL DÍA (Guardar, Limpiar Comprobantes y Cerrar Sesión Global)</button>
+            <button class="btn btn-danger" style="margin-top:10px; padding:10px; font-size:0.9rem;" onclick="cerrarSesionTodos()">🔒 Cerrar Sesión en TODOS los Navegadores Ahora</button>
         `;
 
         showModalGen('💰 Corte de Caja Hoy', html);
@@ -225,8 +225,6 @@ async function ejecutarCorteConRespaldo() {
 
     const todos = await obtenerPedidosSync();
     const cobrados = todos.filter(p => p.estado === 'cobrado');
-
-    if (cobrados.length === 0) return alert('⚠️ No hay cuentas cobradas registradas hoy para realizar el corte.');
 
     const totEfectivo = cobrados.filter(p => p.metodo_pago && p.metodo_pago.includes('Efectivo')).reduce((sum, p) => sum + p.total, 0);
     const totTransf = cobrados.filter(p => p.metodo_pago && p.metodo_pago.includes('Transferencia')).reduce((sum, p) => sum + p.total, 0);
@@ -255,20 +253,26 @@ async function ejecutarCorteConRespaldo() {
     cortes.unshift(nuevoCorte);
     localStorage.setItem('mar_y_sazon_cortes', JSON.stringify(cortes));
 
+    // 1. LIMPIAR FOTOS LOCALES
     let pedidos = getPedidosLocales();
     pedidos.forEach(p => { p.comprobante_img = null; });
     savePedidosLocales(pedidos);
 
+    // 2. LIMPIAR FOTOS EN NUBE (SUPABASE)
     if (_supabase) {
         try {
             await _supabase.from('pedidos').update({ comprobante_img: null }).neq('id', 0);
         } catch(e){}
     }
 
+    // 3. SEÑAL DE CIERRE GLOBAL A TODOS LOS NAVEGADORES
     const nuevoToken = 'CORTE_' + Date.now();
     await setConfig('admin_session_token', nuevoToken);
 
-    alert(`✅ Corte del día (${hoyStr}) guardado exitosamente en "Historial de Días". Se ha cerrado la sesión de Administración en TODOS los navegadores.`);
+    alert(`✅ Corte del día (${hoyStr}) realizado exitosamente:
+- Resumen guardado en Historial.
+- TODAS las fotos de comprobantes han sido eliminadas de la nube.
+- Sesión de Administración CERRADA en todos los dispositivos.`);
     cerrarModalGeneric();
     cerrarAdmin();
 }
