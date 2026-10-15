@@ -1,6 +1,14 @@
 let meseroActual = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
+    const sinMeseros = await getConfig('modo_sin_meseros', 'false');
+    if (sinMeseros === 'true') {
+        document.getElementById('staff-lock-notice').classList.remove('hidden');
+        document.getElementById('staff-form-card').classList.add('hidden');
+        document.getElementById('staff-orders-section').classList.add('hidden');
+        return;
+    }
+
     const select = document.getElementById('staff-select-mesero');
     if (_supabase) {
         try {
@@ -23,7 +31,6 @@ function ingresarMenuStaff() {
 
     if (!name || !pass || !mesa) return alert('Por favor selecciona Mesero, Contraseña y Mesa/Cliente.');
 
-    // Redirigir directamente al menú en Modo Staff sin forma de pago
     window.location.href = `index.html?origen=Staff&mesero=${encodeURIComponent(name)}&mesa=${encodeURIComponent(mesa)}`;
 }
 

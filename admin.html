@@ -30,7 +30,7 @@
             <button onclick="abrirModalCorte()" class="btn-nav-admin bg-corte">💰 Corte</button>
             <button onclick="abrirModalCobradas()" class="btn-nav-admin bg-cobradas">📁 Cobradas Hoy</button>
             <button onclick="abrirModalHistorial()" class="btn-nav-admin bg-historial">📅 Historial de Días</button>
-            <button onclick="alert('Sin comprobantes adjuntos')" class="btn-nav-admin bg-comprobantes">📸 Ver Comprobantes</button>
+            <button onclick="abrirModalComprobantes()" class="btn-nav-admin bg-comprobantes">📸 Ver Comprobantes</button>
             <button onclick="abrirModalPrecios()" class="btn-nav-admin bg-precios">✏️ Precios</button>
             <button onclick="abrirModalTarjeta()" class="btn-nav-admin bg-tarjeta">💳 Config Tarjeta</button>
         </div>
@@ -45,11 +45,12 @@
             <div id="lista-caja-abierta"></div>
         </div>
 
-        <!-- Ajustes -->
+        <!-- Ajustes del Sistema -->
         <div class="admin-card">
             <h3>⚙️ Ajustes del Sistema</h3>
             <button class="btn btn-warning" onclick="cambiarPassAdmin()">Cambiar Contraseña Admin</button><br><br>
-            <button class="btn" onclick="cambiarWhatsApp()">Cambiar WhatsApp Recepción</button>
+            <button class="btn" onclick="cambiarWhatsApp()">Cambiar WhatsApp Recepción</button><br><br>
+            <button class="btn btn-success" onclick="cambiarCuentaBancaria()">Cambiar Número de Cuenta Bancaria</button>
         </div>
 
         <!-- Fondo Slideshow -->
@@ -62,11 +63,23 @@
         <!-- Gestión Meseros -->
         <div class="admin-card">
             <h3>👥 Gestión de Meseros (Max 10)</h3>
+            <button id="btn-toggle-sin-meseros" class="btn btn-warning" style="margin-bottom:10px;" onclick="toggleModoSinMeseros()">🚫 Activar Modo Sin Meseros</button>
             <input type="text" id="mesero-nombre" placeholder="Nombre Mesero">
             <input type="password" id="mesero-pass" placeholder="Contraseña Mesero" style="margin-top:6px;">
             <input type="text" id="mesero-mesa" placeholder="Mesas Asignadas (Ej. Mesa 1)" style="margin-top:6px;">
             <button class="btn btn-success" onclick="agregarMesero()" style="margin-top:8px;">Agregar Mesero</button>
             <ul id="lista-meseros" style="list-style:none; padding:0; margin-top:10px;"></ul>
+        </div>
+    </div>
+
+    <!-- Modal Adjuntar Comprobante -->
+    <div id="modal-subir-comprobante" class="modal hidden">
+        <div class="modal-content">
+            <h3>📸 Adjuntar Comprobante de Pago</h3>
+            <p style="font-size:0.85rem; color:#94a3b8; margin:0;">Seleccione o tome la foto de la transferencia:</p>
+            <input type="file" id="file-comprobante" accept="image/*">
+            <button class="btn btn-success" onclick="confirmarCobroTransferencia()">Confirmar y Cobrar</button>
+            <button class="btn btn-danger" onclick="cerrarModalComprobante()">Cancelar</button>
         </div>
     </div>
 

@@ -27,9 +27,11 @@
 
     <footer class="cart-footer">
         <input type="text" id="nombre-cliente" placeholder="Mesa / Nombre del Cliente">
-        <select id="select-mesero"><option value="">Selecciona Mesero...</option></select>
         
-        <!-- Bloque de Pago exclusivo para Clientes Públicos -->
+        <div id="div-select-mesero">
+            <select id="select-mesero"><option value="">Selecciona Mesero...</option></select>
+        </div>
+        
         <div id="bloque-pago-cliente">
             <select id="metodo-pago" onchange="togglePago(this.value)">
                 <option value="Efectivo al recibir">Efectivo al recibir</option>
@@ -44,7 +46,7 @@
         </div>
     </footer>
 
-    <!-- Modal Seleccionar Cantidad y Notas -->
+    <!-- Modal Seleccionar Cantidad -->
     <div id="modal-item" class="modal hidden">
         <div class="modal-content">
             <h3 id="modal-title">Platillo</h3>
@@ -60,7 +62,7 @@
         </div>
     </div>
 
-    <!-- Modal Cancelación con Clave Admin -->
+    <!-- Modal Cancelación Protegida -->
     <div id="modal-cancel-admin" class="modal hidden">
         <div class="modal-content">
             <h3>🔒 Cancelación de Comandas</h3>

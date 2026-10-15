@@ -13,7 +13,12 @@
     </header>
 
     <div class="admin-grid" style="max-width:500px; margin:20px auto; padding:15px;">
-        <div class="admin-card">
+        <div id="staff-lock-notice" class="admin-card hidden" style="border:2px solid var(--danger);">
+            <h3 style="color:var(--danger); margin:0;">🚫 Acceso Bloqueado</h3>
+            <p style="font-size:0.9rem; color:#f8fafc; margin-top:8px;">El <b>Modo "Sin Meseros"</b> se encuentra actualmente activado desde Administración. No se permite la toma de comandas por meseros.</p>
+        </div>
+
+        <div id="staff-form-card" class="admin-card">
             <h3>Identificación de Mesero</h3>
             <select id="staff-select-mesero"><option value="">Selecciona tu Nombre...</option></select>
             <input type="password" id="staff-pass" placeholder="Contraseña Mesero" style="margin-top:8px;">

@@ -72,7 +72,7 @@ input, select, textarea { padding: 10px; border-radius: 6px; border: 1px solid #
 .bg-corte { background-color: #d97706; }
 .bg-cobradas { background-color: #7e22ce; }
 .bg-historial { background-color: #0d9488; }
-.bg-comprobantes { background-color: #e11d48; opacity: 0.6; cursor: not-allowed; }
+.bg-comprobantes { background-color: #e11d48; cursor: pointer; }
 .bg-precios { background-color: #f97316; }
 .bg-tarjeta { background-color: #2563eb; }
 
@@ -154,6 +154,7 @@ async function obtenerPedidosSync() {
                     estado: p.estado,
                     metodo_pago: p.metodo_pago,
                     origen: p.origen || 'Clientes',
+                    comprobante_img: p.comprobante_img || null,
                     creado_en: p.creado_en,
                     detalles: (p.detalles_pedido || []).map(d => ({
                         nombre: d.producto_nombre,
@@ -170,12 +171,13 @@ async function obtenerPedidosSync() {
     return locales;
 }
 
-async function actualizarEstadoPedidoSync(id, nuevoEstado, metodoPago = null) {
+async function actualizarEstadoPedidoSync(id, nuevoEstado, metodoPago = null, comprobanteImg = null) {
     let locales = getPedidosLocales();
     let target = locales.find(p => p.id == id);
     if (target) {
         target.estado = nuevoEstado;
         if (metodoPago) target.metodo_pago = metodoPago;
+        if (comprobanteImg) target.comprobante_img = comprobanteImg;
         savePedidosLocales(locales);
     }
     if (_supabase) {
@@ -234,9 +236,11 @@ index_html = '''<!DOCTYPE html>
 
     <footer class="cart-footer">
         <input type="text" id="nombre-cliente" placeholder="Mesa / Nombre del Cliente">
-        <select id="select-mesero"><option value="">Selecciona Mesero...</option></select>
         
-        <!-- Bloque de Pago exclusivo para Clientes Públicos -->
+        <div id="div-select-mesero">
+            <select id="select-mesero"><option value="">Selecciona Mesero...</option></select>
+        </div>
+        
         <div id="bloque-pago-cliente">
             <select id="metodo-pago" onchange="togglePago(this.value)">
                 <option value="Efectivo al recibir">Efectivo al recibir</option>
@@ -251,7 +255,7 @@ index_html = '''<!DOCTYPE html>
         </div>
     </footer>
 
-    <!-- Modal Seleccionar Cantidad y Notas -->
+    <!-- Modal Seleccionar Cantidad -->
     <div id="modal-item" class="modal hidden">
         <div class="modal-content">
             <h3 id="modal-title">Platillo</h3>
@@ -267,7 +271,7 @@ index_html = '''<!DOCTYPE html>
         </div>
     </div>
 
-    <!-- Modal Cancelación con Clave Admin -->
+    <!-- Modal Cancelación Protegida -->
     <div id="modal-cancel-admin" class="modal hidden">
         <div class="modal-content">
             <h3>🔒 Cancelación de Comandas</h3>
@@ -306,7 +310,8 @@ let itemSeleccionado = null;
 let cantidadTemp = 1;
 let esModoStaff = false;
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    await comprobarModoSinMeseros();
     detectarModoStaff();
     renderCategorias();
     renderMenu(menuData);
@@ -314,6 +319,14 @@ document.addEventListener('DOMContentLoaded', () => {
     cargarCuentaTransferencia();
     iniciarSlideshow();
 });
+
+async function comprobarModoSinMeseros() {
+    const sinMeseros = await getConfig('modo_sin_meseros', 'false');
+    if (sinMeseros === 'true') {
+        const divMesero = document.getElementById('div-select-mesero');
+        if (divMesero) divMesero.classList.add('hidden');
+    }
+}
 
 function detectarModoStaff() {
     const params = new URLSearchParams(window.location.search);
@@ -325,10 +338,7 @@ function detectarModoStaff() {
         esModoStaff = true;
         document.getElementById('staff-banner').classList.remove('hidden');
         document.getElementById('staff-banner-info').innerText = `${mesero} | Mesa: ${mesa || 'General'}`;
-        
-        // Ocultar bloque de pagos para Staff
         document.getElementById('bloque-pago-cliente').classList.add('hidden');
-        
         if (mesa) document.getElementById('nombre-cliente').value = mesa;
     }
 }
@@ -454,7 +464,7 @@ async function iniciarSlideshow() {
 async function enviarPedido() {
     const cliente = document.getElementById('nombre-cliente').value;
     const selectMesero = document.getElementById('select-mesero');
-    const mesero_nombre = selectMesero.value || 'Cliente Web';
+    const mesero_nombre = selectMesero ? (selectMesero.value || 'Cliente / Directo') : 'Cliente / Directo';
     const metodo_pago = esModoStaff ? 'Pendiente en Caja' : document.getElementById('metodo-pago').value;
 
     if (!cliente || carrito.length === 0) return alert('Ingresa Nombre/Mesa y agrega platillos al pedido.');
@@ -490,7 +500,6 @@ async function enviarPedido() {
     if (!esModoStaff) document.getElementById('nombre-cliente').value = '';
 }
 
-/* Funciones Cancelación protegida por Clave Admin */
 function abrirCancelacionAdmin() {
     document.getElementById('input-cancel-pass').value = '';
     document.getElementById('lista-cancel-pedidos').classList.add('hidden');
@@ -577,7 +586,7 @@ admin_html = '''<!DOCTYPE html>
             <button onclick="abrirModalCorte()" class="btn-nav-admin bg-corte">💰 Corte</button>
             <button onclick="abrirModalCobradas()" class="btn-nav-admin bg-cobradas">📁 Cobradas Hoy</button>
             <button onclick="abrirModalHistorial()" class="btn-nav-admin bg-historial">📅 Historial de Días</button>
-            <button onclick="alert('Sin comprobantes adjuntos')" class="btn-nav-admin bg-comprobantes">📸 Ver Comprobantes</button>
+            <button onclick="abrirModalComprobantes()" class="btn-nav-admin bg-comprobantes">📸 Ver Comprobantes</button>
             <button onclick="abrirModalPrecios()" class="btn-nav-admin bg-precios">✏️ Precios</button>
             <button onclick="abrirModalTarjeta()" class="btn-nav-admin bg-tarjeta">💳 Config Tarjeta</button>
         </div>
@@ -592,11 +601,12 @@ admin_html = '''<!DOCTYPE html>
             <div id="lista-caja-abierta"></div>
         </div>
 
-        <!-- Ajustes -->
+        <!-- Ajustes del Sistema -->
         <div class="admin-card">
             <h3>⚙️ Ajustes del Sistema</h3>
             <button class="btn btn-warning" onclick="cambiarPassAdmin()">Cambiar Contraseña Admin</button><br><br>
-            <button class="btn" onclick="cambiarWhatsApp()">Cambiar WhatsApp Recepción</button>
+            <button class="btn" onclick="cambiarWhatsApp()">Cambiar WhatsApp Recepción</button><br><br>
+            <button class="btn btn-success" onclick="cambiarCuentaBancaria()">Cambiar Número de Cuenta Bancaria</button>
         </div>
 
         <!-- Fondo Slideshow -->
@@ -609,11 +619,23 @@ admin_html = '''<!DOCTYPE html>
         <!-- Gestión Meseros -->
         <div class="admin-card">
             <h3>👥 Gestión de Meseros (Max 10)</h3>
+            <button id="btn-toggle-sin-meseros" class="btn btn-warning" style="margin-bottom:10px;" onclick="toggleModoSinMeseros()">🚫 Activar Modo Sin Meseros</button>
             <input type="text" id="mesero-nombre" placeholder="Nombre Mesero">
             <input type="password" id="mesero-pass" placeholder="Contraseña Mesero" style="margin-top:6px;">
             <input type="text" id="mesero-mesa" placeholder="Mesas Asignadas (Ej. Mesa 1)" style="margin-top:6px;">
             <button class="btn btn-success" onclick="agregarMesero()" style="margin-top:8px;">Agregar Mesero</button>
             <ul id="lista-meseros" style="list-style:none; padding:0; margin-top:10px;"></ul>
+        </div>
+    </div>
+
+    <!-- Modal Adjuntar Comprobante -->
+    <div id="modal-subir-comprobante" class="modal hidden">
+        <div class="modal-content">
+            <h3>📸 Adjuntar Comprobante de Pago</h3>
+            <p style="font-size:0.85rem; color:#94a3b8; margin:0;">Seleccione o tome la foto de la transferencia:</p>
+            <input type="file" id="file-comprobante" accept="image/*">
+            <button class="btn btn-success" onclick="confirmarCobroTransferencia()">Confirmar y Cobrar</button>
+            <button class="btn btn-danger" onclick="cerrarModalComprobante()">Cancelar</button>
         </div>
     </div>
 
@@ -633,6 +655,7 @@ admin_html = '''<!DOCTYPE html>
 
 admin_js = '''let currentAdminPass = 'ROXANA';
 let tabActiva = 'Clientes';
+let pedidoEnCobroTransf = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     syncPass();
@@ -653,10 +676,31 @@ function loginAdmin() {
 }
 
 async function cargarAdmin() {
+    actualizarBotonSinMeseros();
     renderCajaPrincipal();
     cargarMeserosAdmin();
     cargarSlideshowPreview();
     setInterval(renderCajaPrincipal, 4000);
+}
+
+async function actualizarBotonSinMeseros() {
+    const sinMeseros = await getConfig('modo_sin_meseros', 'false');
+    const btn = document.getElementById('btn-toggle-sin-meseros');
+    if (sinMeseros === 'true') {
+        btn.innerHTML = '✅ Modo "Sin Meseros" ACTIVADO (Clic para desactivar)';
+        btn.className = 'btn btn-danger';
+    } else {
+        btn.innerHTML = '🚫 Modo "Sin Meseros" DESACTIVADO (Clic para activar)';
+        btn.className = 'btn btn-warning';
+    }
+}
+
+async function toggleModoSinMeseros() {
+    const actual = await getConfig('modo_sin_meseros', 'false');
+    const nuevo = actual === 'true' ? 'false' : 'true';
+    await setConfig('modo_sin_meseros', nuevo);
+    actualizarBotonSinMeseros();
+    alert(`Modo Sin Meseros ${nuevo === 'true' ? 'ACTIVADO' : 'DESACTIVADO'}.`);
 }
 
 function cambiarTabCaja(tab) {
@@ -689,7 +733,7 @@ async function renderCajaPrincipal() {
             </ul>
             <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:6px; margin-top:8px;">
                 <button class="btn btn-success" style="padding:6px;" onclick="cobrarPedido(${p.id}, 'Efectivo')">💵 Cobrar Efectivo</button>
-                <button class="btn btn-warning" style="padding:6px;" onclick="cobrarPedido(${p.id}, 'Transferencia')">💳 Cobrar Transf.</button>
+                <button class="btn btn-warning" style="padding:6px;" onclick="solicitarComprobanteTransferencia(${p.id})">💳 Cobrar Transf.</button>
                 <button class="btn" style="background:#8b5cf6; padding:6px;" onclick="aplicarDescuento(${p.id})">🏷️ Descuento</button>
                 <button class="btn btn-danger" style="padding:6px;" onclick="cancelarCuenta(${p.id})">❌ Cancelar</button>
             </div>
@@ -701,6 +745,37 @@ async function cobrarPedido(id, metodo) {
     await actualizarEstadoPedidoSync(id, 'cobrado', metodo);
     alert(`Cuenta #${id} cobrada exitosamente con ${metodo}.`);
     renderCajaPrincipal();
+}
+
+function solicitarComprobanteTransferencia(id) {
+    pedidoEnCobroTransf = id;
+    document.getElementById('file-comprobante').value = '';
+    document.getElementById('modal-subir-comprobante').classList.remove('hidden');
+}
+
+function cerrarModalComprobante() {
+    document.getElementById('modal-subir-comprobante').classList.add('hidden');
+}
+
+async function confirmarCobroTransferencia() {
+    const fileInput = document.getElementById('file-comprobante');
+    const file = fileInput.files[0];
+
+    if (file) {
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+            await actualizarEstadoPedidoSync(pedidoEnCobroTransf, 'cobrado', 'Transferencia', reader.result);
+            alert(`Cuenta #${pedidoEnCobroTransf} cobrada con Transferencia y Comprobante Adjunto.`);
+            cerrarModalComprobante();
+            renderCajaPrincipal();
+        };
+        reader.readAsDataURL(file);
+    } else {
+        await actualizarEstadoPedidoSync(pedidoEnCobroTransf, 'cobrado', 'Transferencia', null);
+        alert(`Cuenta #${pedidoEnCobroTransf} cobrada con Transferencia (Sin foto).`);
+        cerrarModalComprobante();
+        renderCajaPrincipal();
+    }
 }
 
 async function aplicarDescuento(id) {
@@ -753,6 +828,25 @@ function abrirModalCobradas() {
     });
 }
 
+function abrirModalComprobantes() {
+    obtenerPedidosSync().then(todos => {
+        const conComprobante = todos.filter(p => p.comprobante_img);
+        if (conComprobante.length === 0) {
+            showModalGen('📸 Comprobantes de Pago', '<p style="color:#94a3b8;">No se han adjuntado fotos de comprobantes hoy.</p>');
+            return;
+        }
+
+        let html = conComprobante.map(p => `
+            <div style="border-bottom:1px solid #334155; padding:8px 0; text-align:center;">
+                <b>#${p.id} - ${p.cliente_mesa} ($${p.total.toFixed(2)})</b><br>
+                <img src="${p.comprobante_img}" style="max-width:100%; height:auto; border-radius:8px; margin-top:8px; border:1px solid #334155;">
+            </div>
+        `).join('');
+
+        showModalGen('📸 Comprobantes de Pago', html);
+    });
+}
+
 function abrirModalHistorial() {
     showModalGen('📅 Historial de Días', '<p>Sincronizado con base de datos en nube.</p>');
 }
@@ -762,10 +856,7 @@ function abrirModalPrecios() {
 }
 
 function abrirModalTarjeta() {
-    getConfig('cuenta_transferencia', '1234 5678 9012 3456 (BBVA)').then(c => {
-        const n = prompt('Ingrese nueva cuenta bancaria para transferencias:', c);
-        if (n) setConfig('cuenta_transferencia', n).then(() => alert('Guardado.'));
-    });
+    cambiarCuentaBancaria();
 }
 
 function showModalGen(title, body) {
@@ -792,6 +883,15 @@ async function cambiarWhatsApp() {
     if (newWa) {
         await setConfig('whatsapp_num', newWa);
         alert('Número de WhatsApp actualizado.');
+    }
+}
+
+async function cambiarCuentaBancaria() {
+    const cuentaActual = await getConfig('cuenta_transferencia', '1234 5678 9012 3456 (BBVA)');
+    const nuevaCuenta = prompt('Ingrese el NUEVO número de cuenta bancaria:', cuentaActual);
+    if (nuevaCuenta) {
+        await setConfig('cuenta_transferencia', nuevaCuenta);
+        alert('Cuenta bancaria actualizada correctamente.');
     }
 }
 
@@ -891,7 +991,12 @@ staff_html = '''<!DOCTYPE html>
     </header>
 
     <div class="admin-grid" style="max-width:500px; margin:20px auto; padding:15px;">
-        <div class="admin-card">
+        <div id="staff-lock-notice" class="admin-card hidden" style="border:2px solid var(--danger);">
+            <h3 style="color:var(--danger); margin:0;">🚫 Acceso Bloqueado</h3>
+            <p style="font-size:0.9rem; color:#f8fafc; margin-top:8px;">El <b>Modo "Sin Meseros"</b> se encuentra actualmente activado desde Administración. No se permite la toma de comandas por meseros.</p>
+        </div>
+
+        <div id="staff-form-card" class="admin-card">
             <h3>Identificación de Mesero</h3>
             <select id="staff-select-mesero"><option value="">Selecciona tu Nombre...</option></select>
             <input type="password" id="staff-pass" placeholder="Contraseña Mesero" style="margin-top:8px;">
@@ -913,6 +1018,14 @@ staff_html = '''<!DOCTYPE html>
 staff_js = '''let meseroActual = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
+    const sinMeseros = await getConfig('modo_sin_meseros', 'false');
+    if (sinMeseros === 'true') {
+        document.getElementById('staff-lock-notice').classList.remove('hidden');
+        document.getElementById('staff-form-card').classList.add('hidden');
+        document.getElementById('staff-orders-section').classList.add('hidden');
+        return;
+    }
+
     const select = document.getElementById('staff-select-mesero');
     if (_supabase) {
         try {
@@ -935,7 +1048,6 @@ function ingresarMenuStaff() {
 
     if (!name || !pass || !mesa) return alert('Por favor selecciona Mesero, Contraseña y Mesa/Cliente.');
 
-    // Redirigir directamente al menú en Modo Staff sin forma de pago
     window.location.href = `index.html?origen=Staff&mesero=${encodeURIComponent(name)}&mesa=${encodeURIComponent(mesa)}`;
 }
 
@@ -1061,4 +1173,4 @@ with open('js/admin.js', 'w') as f: f.write(admin_js)
 with open('js/staff.js', 'w') as f: f.write(staff_js)
 with open('js/cocina.js', 'w') as f: f.write(cocina_js)
 
-print("ARCHIVOS_SISTEMA_MAR_Y_SAZON_ACTUALIZADOS")
+print("COMPLETADO_EXITOSAMENTE")

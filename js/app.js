@@ -20,7 +20,8 @@ let itemSeleccionado = null;
 let cantidadTemp = 1;
 let esModoStaff = false;
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    await comprobarModoSinMeseros();
     detectarModoStaff();
     renderCategorias();
     renderMenu(menuData);
@@ -28,6 +29,14 @@ document.addEventListener('DOMContentLoaded', () => {
     cargarCuentaTransferencia();
     iniciarSlideshow();
 });
+
+async function comprobarModoSinMeseros() {
+    const sinMeseros = await getConfig('modo_sin_meseros', 'false');
+    if (sinMeseros === 'true') {
+        const divMesero = document.getElementById('div-select-mesero');
+        if (divMesero) divMesero.classList.add('hidden');
+    }
+}
 
 function detectarModoStaff() {
     const params = new URLSearchParams(window.location.search);
@@ -39,10 +48,7 @@ function detectarModoStaff() {
         esModoStaff = true;
         document.getElementById('staff-banner').classList.remove('hidden');
         document.getElementById('staff-banner-info').innerText = `${mesero} | Mesa: ${mesa || 'General'}`;
-        
-        // Ocultar bloque de pagos para Staff
         document.getElementById('bloque-pago-cliente').classList.add('hidden');
-        
         if (mesa) document.getElementById('nombre-cliente').value = mesa;
     }
 }
@@ -168,7 +174,7 @@ async function iniciarSlideshow() {
 async function enviarPedido() {
     const cliente = document.getElementById('nombre-cliente').value;
     const selectMesero = document.getElementById('select-mesero');
-    const mesero_nombre = selectMesero.value || 'Cliente Web';
+    const mesero_nombre = selectMesero ? (selectMesero.value || 'Cliente / Directo') : 'Cliente / Directo';
     const metodo_pago = esModoStaff ? 'Pendiente en Caja' : document.getElementById('metodo-pago').value;
 
     if (!cliente || carrito.length === 0) return alert('Ingresa Nombre/Mesa y agrega platillos al pedido.');
@@ -213,7 +219,6 @@ async function enviarPedido() {
     if (!esModoStaff) document.getElementById('nombre-cliente').value = '';
 }
 
-/* Funciones Cancelación protegida por Clave Admin */
 function abrirCancelacionAdmin() {
     document.getElementById('input-cancel-pass').value = '';
     document.getElementById('lista-cancel-pedidos').classList.add('hidden');

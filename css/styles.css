@@ -67,7 +67,7 @@ input, select, textarea { padding: 10px; border-radius: 6px; border: 1px solid #
 .bg-corte { background-color: #d97706; }
 .bg-cobradas { background-color: #7e22ce; }
 .bg-historial { background-color: #0d9488; }
-.bg-comprobantes { background-color: #e11d48; opacity: 0.6; cursor: not-allowed; }
+.bg-comprobantes { background-color: #e11d48; cursor: pointer; }
 .bg-precios { background-color: #f97316; }
 .bg-tarjeta { background-color: #2563eb; }
 

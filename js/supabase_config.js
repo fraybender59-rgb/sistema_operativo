@@ -64,6 +64,7 @@ async function obtenerPedidosSync() {
                     estado: p.estado,
                     metodo_pago: p.metodo_pago,
                     origen: p.origen || 'Clientes',
+                    comprobante_img: p.comprobante_img || null,
                     creado_en: p.creado_en,
                     detalles: (p.detalles_pedido || []).map(d => ({
                         nombre: d.producto_nombre,
@@ -80,12 +81,13 @@ async function obtenerPedidosSync() {
     return locales;
 }
 
-async function actualizarEstadoPedidoSync(id, nuevoEstado, metodoPago = null) {
+async function actualizarEstadoPedidoSync(id, nuevoEstado, metodoPago = null, comprobanteImg = null) {
     let locales = getPedidosLocales();
     let target = locales.find(p => p.id == id);
     if (target) {
         target.estado = nuevoEstado;
         if (metodoPago) target.metodo_pago = metodoPago;
+        if (comprobanteImg) target.comprobante_img = comprobanteImg;
         savePedidosLocales(locales);
     }
     if (_supabase) {

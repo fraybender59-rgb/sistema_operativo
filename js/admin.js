@@ -1,5 +1,6 @@
 let currentAdminPass = 'ROXANA';
 let tabActiva = 'Clientes';
+let pedidoEnCobroTransf = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     syncPass();
@@ -20,10 +21,31 @@ function loginAdmin() {
 }
 
 async function cargarAdmin() {
+    actualizarBotonSinMeseros();
     renderCajaPrincipal();
     cargarMeserosAdmin();
     cargarSlideshowPreview();
     setInterval(renderCajaPrincipal, 4000);
+}
+
+async function actualizarBotonSinMeseros() {
+    const sinMeseros = await getConfig('modo_sin_meseros', 'false');
+    const btn = document.getElementById('btn-toggle-sin-meseros');
+    if (sinMeseros === 'true') {
+        btn.innerHTML = '✅ Modo "Sin Meseros" ACTIVADO (Clic para desactivar)';
+        btn.className = 'btn btn-danger';
+    } else {
+        btn.innerHTML = '🚫 Modo "Sin Meseros" DESACTIVADO (Clic para activar)';
+        btn.className = 'btn btn-warning';
+    }
+}
+
+async function toggleModoSinMeseros() {
+    const actual = await getConfig('modo_sin_meseros', 'false');
+    const nuevo = actual === 'true' ? 'false' : 'true';
+    await setConfig('modo_sin_meseros', nuevo);
+    actualizarBotonSinMeseros();
+    alert(`Modo Sin Meseros ${nuevo === 'true' ? 'ACTIVADO' : 'DESACTIVADO'}.`);
 }
 
 function cambiarTabCaja(tab) {
@@ -56,7 +78,7 @@ async function renderCajaPrincipal() {
             </ul>
             <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:6px; margin-top:8px;">
                 <button class="btn btn-success" style="padding:6px;" onclick="cobrarPedido(${p.id}, 'Efectivo')">💵 Cobrar Efectivo</button>
-                <button class="btn btn-warning" style="padding:6px;" onclick="cobrarPedido(${p.id}, 'Transferencia')">💳 Cobrar Transf.</button>
+                <button class="btn btn-warning" style="padding:6px;" onclick="solicitarComprobanteTransferencia(${p.id})">💳 Cobrar Transf.</button>
                 <button class="btn" style="background:#8b5cf6; padding:6px;" onclick="aplicarDescuento(${p.id})">🏷️ Descuento</button>
                 <button class="btn btn-danger" style="padding:6px;" onclick="cancelarCuenta(${p.id})">❌ Cancelar</button>
             </div>
@@ -68,6 +90,37 @@ async function cobrarPedido(id, metodo) {
     await actualizarEstadoPedidoSync(id, 'cobrado', metodo);
     alert(`Cuenta #${id} cobrada exitosamente con ${metodo}.`);
     renderCajaPrincipal();
+}
+
+function solicitarComprobanteTransferencia(id) {
+    pedidoEnCobroTransf = id;
+    document.getElementById('file-comprobante').value = '';
+    document.getElementById('modal-subir-comprobante').classList.remove('hidden');
+}
+
+function cerrarModalComprobante() {
+    document.getElementById('modal-subir-comprobante').classList.add('hidden');
+}
+
+async function confirmarCobroTransferencia() {
+    const fileInput = document.getElementById('file-comprobante');
+    const file = fileInput.files[0];
+
+    if (file) {
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+            await actualizarEstadoPedidoSync(pedidoEnCobroTransf, 'cobrado', 'Transferencia', reader.result);
+            alert(`Cuenta #${pedidoEnCobroTransf} cobrada con Transferencia y Comprobante Adjunto.`);
+            cerrarModalComprobante();
+            renderCajaPrincipal();
+        };
+        reader.readAsDataURL(file);
+    } else {
+        await actualizarEstadoPedidoSync(pedidoEnCobroTransf, 'cobrado', 'Transferencia', null);
+        alert(`Cuenta #${pedidoEnCobroTransf} cobrada con Transferencia (Sin foto).`);
+        cerrarModalComprobante();
+        renderCajaPrincipal();
+    }
 }
 
 async function aplicarDescuento(id) {
@@ -120,6 +173,25 @@ function abrirModalCobradas() {
     });
 }
 
+function abrirModalComprobantes() {
+    obtenerPedidosSync().then(todos => {
+        const conComprobante = todos.filter(p => p.comprobante_img);
+        if (conComprobante.length === 0) {
+            showModalGen('📸 Comprobantes de Pago', '<p style="color:#94a3b8;">No se han adjuntado fotos de comprobantes hoy.</p>');
+            return;
+        }
+
+        let html = conComprobante.map(p => `
+            <div style="border-bottom:1px solid #334155; padding:8px 0; text-align:center;">
+                <b>#${p.id} - ${p.cliente_mesa} ($${p.total.toFixed(2)})</b><br>
+                <img src="${p.comprobante_img}" style="max-width:100%; height:auto; border-radius:8px; margin-top:8px; border:1px solid #334155;">
+            </div>
+        `).join('');
+
+        showModalGen('📸 Comprobantes de Pago', html);
+    });
+}
+
 function abrirModalHistorial() {
     showModalGen('📅 Historial de Días', '<p>Sincronizado con base de datos en nube.</p>');
 }
@@ -129,10 +201,7 @@ function abrirModalPrecios() {
 }
 
 function abrirModalTarjeta() {
-    getConfig('cuenta_transferencia', '1234 5678 9012 3456 (BBVA)').then(c => {
-        const n = prompt('Ingrese nueva cuenta bancaria para transferencias:', c);
-        if (n) setConfig('cuenta_transferencia', n).then(() => alert('Guardado.'));
-    });
+    cambiarCuentaBancaria();
 }
 
 function showModalGen(title, body) {
@@ -159,6 +228,15 @@ async function cambiarWhatsApp() {
     if (newWa) {
         await setConfig('whatsapp_num', newWa);
         alert('Número de WhatsApp actualizado.');
+    }
+}
+
+async function cambiarCuentaBancaria() {
+    const cuentaActual = await getConfig('cuenta_transferencia', '1234 5678 9012 3456 (BBVA)');
+    const nuevaCuenta = prompt('Ingrese el NUEVO número de cuenta bancaria:', cuentaActual);
+    if (nuevaCuenta) {
+        await setConfig('cuenta_transferencia', nuevaCuenta);
+        alert('Cuenta bancaria actualizada correctamente.');
     }
 }
 
