@@ -70,6 +70,7 @@ function cambiarTabCaja(tab) {
     document.getElementById('tab-cli').classList.toggle('active', tab === 'Clientes');
     document.getElementById('tab-sta').classList.toggle('active', tab === 'Staff');
     renderCajaPrincipal();
+    cerrarAdmin();
 }
 
 async function renderCajaPrincipal() {
@@ -107,6 +108,7 @@ async function cobrarPedido(id, metodo) {
     await actualizarEstadoPedidoSync(id, 'cobrado', metodo);
     alert(`Cuenta #${id} cobrada exitosamente con ${metodo}.`);
     renderCajaPrincipal();
+    cerrarAdmin();
 }
 
 function solicitarComprobanteTransferencia(id) {
@@ -564,4 +566,15 @@ async function ejecutarCorteConRespaldo() {
     alert(`✅ Corte del día (${hoyStr}) guardado exitosamente en "Historial de Días". Los comprobantes activos se archivaron correctamente.`);
     cerrarModalGeneric();
     renderCajaPrincipal();
+    cerrarAdmin();
+}
+
+
+function cerrarAdmin() {
+    const inputPass = document.getElementById('admin-pass-input');
+    if (inputPass) inputPass.value = '';
+    const panel = document.getElementById('admin-panel');
+    const modal = document.getElementById('admin-login-modal');
+    if (panel) panel.classList.add('hidden');
+    if (modal) modal.classList.remove('hidden');
 }
