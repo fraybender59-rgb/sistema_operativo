@@ -1,6 +1,7 @@
 let currentAdminPass = 'ROXANA';
 let tabActiva = 'Clientes';
 let pedidoEnCobroTransf = null;
+let miTokenSesion = localStorage.getItem('my_session_token') || '';
 
 const CATALOGO_MENU = [
     { id: 1, categoria: 'Cócteles', nombre: 'Cóctel de Camarón Grande', precio: 150.00 },
@@ -28,13 +29,46 @@ async function syncPass() {
     if (p) currentAdminPass = p;
 }
 
-function loginAdmin() {
+async function loginAdmin() {
     const input = document.getElementById('admin-pass-input').value.trim();
     if (input === currentAdminPass || input === 'ROXANA') {
+        miTokenSesion = Date.now().toString();
+        localStorage.setItem('my_session_token', miTokenSesion);
+        await setConfig('admin_session_token', miTokenSesion);
+
         document.getElementById('admin-login-modal').classList.add('hidden');
         document.getElementById('admin-panel').classList.remove('hidden');
         cargarAdmin();
-    } else { alert('Contraseña incorrecta'); }
+    } else { alert('❌ Contraseña incorrecta'); }
+}
+
+function cerrarAdmin() {
+    localStorage.removeItem('my_session_token');
+    miTokenSesion = '';
+    const inputPass = document.getElementById('admin-pass-input');
+    if (inputPass) inputPass.value = '';
+    const panel = document.getElementById('admin-panel');
+    const modal = document.getElementById('admin-login-modal');
+    if (panel) panel.classList.add('hidden');
+    if (modal) modal.classList.remove('hidden');
+}
+
+async function cerrarSesionTodos() {
+    const nuevoToken = 'CLOSED_' + Date.now();
+    await setConfig('admin_session_token', nuevoToken);
+    alert('🔒 Sesión cerrada globalmente en TODOS los navegadores.');
+    cerrarAdmin();
+}
+
+async function verificarSesionGlobal() {
+    const panel = document.getElementById('admin-panel');
+    if (panel && !panel.classList.contains('hidden')) {
+        const tokenRemoto = await getConfig('admin_session_token', '');
+        if (tokenRemoto && miTokenSesion && tokenRemoto !== miTokenSesion) {
+            alert('🔒 Tu sesión ha sido cerrada remotamente desde otro dispositivo o por un Corte del Día.');
+            cerrarAdmin();
+        }
+    }
 }
 
 async function cargarAdmin() {
@@ -43,11 +77,13 @@ async function cargarAdmin() {
     cargarMeserosAdmin();
     cargarSlideshowPreview();
     setInterval(renderCajaPrincipal, 4000);
+    setInterval(verificarSesionGlobal, 3000);
 }
 
 async function actualizarBotonSinMeseros() {
     const sinMeseros = await getConfig('modo_sin_meseros', 'false');
     const btn = document.getElementById('btn-toggle-sin-meseros');
+    if (!btn) return;
     if (sinMeseros === 'true') {
         btn.innerHTML = '✅ Modo "Sin Meseros" ACTIVADO (Clic para desactivar)';
         btn.className = 'btn btn-danger';
@@ -70,7 +106,6 @@ function cambiarTabCaja(tab) {
     document.getElementById('tab-cli').classList.toggle('active', tab === 'Clientes');
     document.getElementById('tab-sta').classList.toggle('active', tab === 'Staff');
     renderCajaPrincipal();
-    cerrarAdmin();
 }
 
 async function renderCajaPrincipal() {
@@ -108,7 +143,6 @@ async function cobrarPedido(id, metodo) {
     await actualizarEstadoPedidoSync(id, 'cobrado', metodo);
     alert(`Cuenta #${id} cobrada exitosamente con ${metodo}.`);
     renderCajaPrincipal();
-    cerrarAdmin();
 }
 
 function solicitarComprobanteTransferencia(id) {
@@ -164,17 +198,38 @@ async function cancelarCuenta(id) {
     } else alert('Contraseña incorrecta.');
 }
 
-async function hacerCorteDelDia() {
-    const pass = prompt('Ingrese contraseña de ADMINISTRACIÓN para autorizar el CORTE DEL DÍA:');
-    if (pass !== currentAdminPass && pass !== 'ROXANA') return alert('Contraseña incorrecta.');
+function abrirModalCorte() {
+    obtenerPedidosSync().then(todos => {
+        const cobrados = todos.filter(p => p.estado === 'cobrado');
+        const totEfectivo = cobrados.filter(p => p.metodo_pago && p.metodo_pago.includes('Efectivo')).reduce((sum, p) => sum + p.total, 0);
+        const totTransf = cobrados.filter(p => p.metodo_pago && p.metodo_pago.includes('Transferencia')).reduce((sum, p) => sum + p.total, 0);
+        const totalGen = totEfectivo + totTransf;
+
+        const html = `
+            <p style="font-size:1.1rem;">💵 <b>Efectivo:</b> $${totEfectivo.toFixed(2)}</p>
+            <p style="font-size:1.1rem;">💳 <b>Transferencias:</b> $${totTransf.toFixed(2)}</p>
+            <hr style="border-color:#334155;">
+            <p style="font-size:1.3rem; color:#10b981;"><b>Total General: $${totalGen.toFixed(2)}</b></p>
+
+            <button class="btn btn-warning" style="margin-top:15px; padding:12px; font-size:1rem; font-weight:bold;" onclick="ejecutarCorteConRespaldo()">🌅 Realizar Corte del Día y Archivar</button>
+            <button class="btn btn-danger" style="margin-top:10px; padding:10px; font-size:0.9rem;" onclick="cerrarSesionTodos()">🔒 Cerrar Sesión en TODOS los Navegadores</button>
+        `;
+
+        showModalGen('💰 Corte de Caja Hoy', html);
+    });
+}
+
+async function ejecutarCorteConRespaldo() {
+    const pass = prompt('Ingrese contraseña de ADMINISTRACIÓN (ROXANA) para procesar el Corte del Día:');
+    if (pass !== currentAdminPass && pass !== 'ROXANA') return alert('❌ Contraseña incorrecta.');
 
     const todos = await obtenerPedidosSync();
     const cobrados = todos.filter(p => p.estado === 'cobrado');
 
-    if (cobrados.length === 0) return alert('No hay cuentas cobradas para generar el corte de hoy.');
+    if (cobrados.length === 0) return alert('⚠️ No hay cuentas cobradas registradas hoy para realizar el corte.');
 
-    const totEfectivo = cobrados.filter(p => p.metodo_pago.includes('Efectivo')).reduce((sum, p) => sum + p.total, 0);
-    const totTransf = cobrados.filter(p => p.metodo_pago.includes('Transferencia')).reduce((sum, p) => sum + p.total, 0);
+    const totEfectivo = cobrados.filter(p => p.metodo_pago && p.metodo_pago.includes('Efectivo')).reduce((sum, p) => sum + p.total, 0);
+    const totTransf = cobrados.filter(p => p.metodo_pago && p.metodo_pago.includes('Transferencia')).reduce((sum, p) => sum + p.total, 0);
     const totalGen = totEfectivo + totTransf;
 
     const comprobantes = cobrados.filter(p => p.comprobante_img).map(p => ({
@@ -200,16 +255,22 @@ async function hacerCorteDelDia() {
     cortes.unshift(nuevoCorte);
     localStorage.setItem('mar_y_sazon_cortes', JSON.stringify(cortes));
 
-    limpiarComprobantesAntiguos();
+    let pedidos = getPedidosLocales();
+    pedidos.forEach(p => { p.comprobante_img = null; });
+    savePedidosLocales(pedidos);
 
-    showModalGen('🌅 Corte del Día Realizado', `
-        <p>✅ <b>Corte de Hoy (${hoyStr}) guardado exitosamente.</b></p>
-        <hr style="border-color:#334155;">
-        <p>💵 <b>Efectivo:</b> $${totEfectivo.toFixed(2)}</p>
-        <p>💳 <b>Transferencias / Tarjeta:</b> $${totTransf.toFixed(2)}</p>
-        <p style="font-size:1.2rem; color:#10b981;"><b>Venta Total: $${totalGen.toFixed(2)}</b></p>
-        <p style="font-size:0.8rem; color:#94a3b8;">* Los comprobantes asociados se almacenarán por 7 días automáticamente.</p>
-    `);
+    if (_supabase) {
+        try {
+            await _supabase.from('pedidos').update({ comprobante_img: null }).neq('id', 0);
+        } catch(e){}
+    }
+
+    const nuevoToken = 'CORTE_' + Date.now();
+    await setConfig('admin_session_token', nuevoToken);
+
+    alert(`✅ Corte del día (${hoyStr}) guardado exitosamente en "Historial de Días". Se ha cerrado la sesión de Administración en TODOS los navegadores.`);
+    cerrarModalGeneric();
+    cerrarAdmin();
 }
 
 function abrirModalCobradas() {
@@ -224,7 +285,6 @@ function abrirModalCobradas() {
     });
 }
 
-
 async function abrirModalComprobantes() {
     const todos = await obtenerPedidosSync();
     const conComprobante = todos.filter(p => p.comprobante_img);
@@ -236,7 +296,7 @@ async function abrirModalComprobantes() {
     `;
 
     if (conComprobante.length === 0) {
-        html += '<p style="color:#94a3b8; text-align:center;">No hay fotos de comprobantes guardadas.</p>';
+        html += '<p style="color:#94a3b8; text-align:center;">No hay fotos de comprobantes guardadas en la memoria.</p>';
     } else {
         html += conComprobante.map(p => `
             <div style="border-bottom:1px solid #334155; padding:10px 0; text-align:center;">
@@ -341,7 +401,6 @@ function verDetalleCorte(idx) {
     showModalGen(`Detalle Corte ${c.fecha}`, html);
 }
 
-/* Modificación Directa de Precios desde Administración */
 async function abrirModalPrecios() {
     let html = '<div style="display:flex; flex-direction:column; gap:10px;">';
     
@@ -494,87 +553,4 @@ async function borrarImgSlide(idx) {
     imgs.splice(idx, 1);
     await setConfig('fondo_slideshow', JSON.stringify(imgs));
     cargarSlideshowPreview();
-}
-
-
-function abrirModalCorte() {
-    obtenerPedidosSync().then(todos => {
-        const cobrados = todos.filter(p => p.estado === 'cobrado');
-        const totEfectivo = cobrados.filter(p => p.metodo_pago && p.metodo_pago.includes('Efectivo')).reduce((sum, p) => sum + p.total, 0);
-        const totTransf = cobrados.filter(p => p.metodo_pago && p.metodo_pago.includes('Transferencia')).reduce((sum, p) => sum + p.total, 0);
-        const totalGen = totEfectivo + totTransf;
-
-        const html = `
-            <p>💵 <b>Efectivo:</b> $${totEfectivo.toFixed(2)}</p>
-            <p>💳 <b>Transferencias:</b> $${totTransf.toFixed(2)}</p>
-            <hr style="border-color:#334155;">
-            <p style="font-size:1.2rem; color:#10b981;"><b>Total General: $${totalGen.toFixed(2)}</b></p>
-            <button class="btn btn-warning" style="margin-top:12px; padding:12px; font-size:1rem;" onclick="ejecutarCorteConRespaldo()">🌅 Realizar Corte del Día y Archivar</button>
-        `;
-
-        showModalGen('💰 Corte de Caja Hoy', html);
-    });
-}
-
-async function ejecutarCorteConRespaldo() {
-    const pass = prompt('Ingrese contraseña de ADMINISTRACIÓN (ROXANA) para procesar el Corte del Día:');
-    if (pass !== currentAdminPass && pass !== 'ROXANA') return alert('❌ Contraseña incorrecta.');
-
-    const todos = await obtenerPedidosSync();
-    const cobrados = todos.filter(p => p.estado === 'cobrado');
-
-    if (cobrados.length === 0) return alert('⚠️ No hay cuentas cobradas registradas hoy para realizar el corte.');
-
-    const totEfectivo = cobrados.filter(p => p.metodo_pago && p.metodo_pago.includes('Efectivo')).reduce((sum, p) => sum + p.total, 0);
-    const totTransf = cobrados.filter(p => p.metodo_pago && p.metodo_pago.includes('Transferencia')).reduce((sum, p) => sum + p.total, 0);
-    const totalGen = totEfectivo + totTransf;
-
-    const comprobantes = cobrados.filter(p => p.comprobante_img).map(p => ({
-        id: p.id,
-        cliente: p.cliente_mesa,
-        total: p.total,
-        img: p.comprobante_img
-    }));
-
-    const hoyStr = new Date().toLocaleDateString('es-MX', { year: 'numeric', month: '2-digit', day: '2-digit' });
-
-    const nuevoCorte = {
-        fecha: hoyStr,
-        timestamp: Date.now(),
-        efectivo: totEfectivo,
-        transferencia: totTransf,
-        total: totalGen,
-        comprobantes: comprobantes,
-        pedidos: cobrados
-    };
-
-    let cortes = JSON.parse(localStorage.getItem('mar_y_sazon_cortes') || '[]');
-    cortes.unshift(nuevoCorte);
-    localStorage.setItem('mar_y_sazon_cortes', JSON.stringify(cortes));
-
-    // Una vez respaldado en Historial de Días, limpiamos imágenes activas en pedidos
-    let pedidos = getPedidosLocales();
-    pedidos.forEach(p => { p.comprobante_img = null; });
-    savePedidosLocales(pedidos);
-
-    if (_supabase) {
-        try {
-            await _supabase.from('pedidos').update({ comprobante_img: null }).neq('id', 0);
-        } catch(e){}
-    }
-
-    alert(`✅ Corte del día (${hoyStr}) guardado exitosamente en "Historial de Días". Los comprobantes activos se archivaron correctamente.`);
-    cerrarModalGeneric();
-    renderCajaPrincipal();
-    cerrarAdmin();
-}
-
-
-function cerrarAdmin() {
-    const inputPass = document.getElementById('admin-pass-input');
-    if (inputPass) inputPass.value = '';
-    const panel = document.getElementById('admin-panel');
-    const modal = document.getElementById('admin-login-modal');
-    if (panel) panel.classList.add('hidden');
-    if (modal) modal.classList.remove('hidden');
 }
