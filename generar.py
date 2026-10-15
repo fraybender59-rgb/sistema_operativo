@@ -360,7 +360,6 @@ index_html = '''<!DOCTYPE html>
 </html>'''
 
 app_js = '''
-// Imágenes SVG garantizadas que cargan sin necesidad de conexión externa
 const SVG_COCTEL = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200" viewBox="0 0 300 200"><rect width="300" height="200" fill="%230f172a"/><path d="M100 60 L200 60 L150 130 Z" fill="%23f59e0b" opacity="0.8"/><rect x="145" y="130" width="10" height="40" fill="%23cbd5e1"/><rect x="120" y="170" width="60" height="10" fill="%23cbd5e1"/><circle cx="150" cy="50" r="15" fill="%23ef4444"/><text x="150" y="190" fill="%2338bdf8" font-size="14" font-family="sans-serif" text-anchor="middle">Cóctel de Camarón</text></svg>';
 const SVG_CEVICHE = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200" viewBox="0 0 300 200"><rect width="300" height="200" fill="%230f172a"/><circle cx="150" cy="110" r="60" fill="%231e293b" stroke="%23f59e0b" stroke-width="4"/><circle cx="130" cy="100" r="12" fill="%2310b981"/><circle cx="165" cy="115" r="14" fill="%23ef4444"/><circle cx="150" cy="125" r="10" fill="%23f59e0b"/><text x="150" y="190" fill="%2338bdf8" font-size="14" font-family="sans-serif" text-anchor="middle">Ceviche Fresco</text></svg>';
 const SVG_AGUACHILE = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200" viewBox="0 0 300 200"><rect width="300" height="200" fill="%230f172a"/><ellipse cx="150" cy="110" rx="70" ry="45" fill="%23064e3b" stroke="%2310b981" stroke-width="4"/><path d="M110 110 Q 150 80 190 110" stroke="%23ef4444" stroke-width="6" fill="none"/><text x="150" y="190" fill="%2338bdf8" font-size="14" font-family="sans-serif" text-anchor="middle">Aguachile Especial</text></svg>';
@@ -403,7 +402,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     cargarCuentaTransferencia();
     iniciarSlideshowPromos();
     
-    // Cargar imagen inicial en modal bienvenida
     document.getElementById('promo-slide-img').src = PROMO_SLIDES[0];
 });
 
@@ -933,20 +931,44 @@ function abrirModalCobradas() {
 function abrirModalComprobantes() {
     obtenerPedidosSync().then(todos => {
         const conComprobante = todos.filter(p => p.comprobante_img);
+        
+        let html = `
+            <div style="margin-bottom:12px; text-align:center;">
+                <button class="btn btn-danger" style="padding:8px 12px; font-size:0.85rem;" onclick="vaciarComprobantes()">🗑️ Vaciar Memoria de Comprobantes</button>
+            </div>
+        `;
+
         if (conComprobante.length === 0) {
-            showModalGen('📸 Comprobantes de Pago', '<p style="color:#94a3b8;">No se han adjuntado fotos de comprobantes recientemente.</p>');
-            return;
+            html += '<p style="color:#94a3b8; text-align:center;">No hay fotos de comprobantes guardadas en la memoria.</p>';
+        } else {
+            html += conComprobante.map(p => `
+                <div style="border-bottom:1px solid #334155; padding:8px 0; text-align:center;">
+                    <b>#${p.id} - ${p.cliente_mesa} ($${p.total.toFixed(2)})</b><br>
+                    <img src="${p.comprobante_img}" style="max-width:100%; height:auto; border-radius:8px; margin-top:8px; border:1px solid #334155;">
+                </div>
+            `).join('');
         }
 
-        let html = conComprobante.map(p => `
-            <div style="border-bottom:1px solid #334155; padding:8px 0; text-align:center;">
-                <b>#${p.id} - ${p.cliente_mesa} ($${p.total.toFixed(2)})</b><br>
-                <img src="${p.comprobante_img}" style="max-width:100%; height:auto; border-radius:8px; margin-top:8px; border:1px solid #334155;">
-            </div>
-        `).join('');
-
-        showModalGen('📸 Comprobantes de Pago (Últimos 7 días)', html);
+        showModalGen('📸 Comprobantes de Pago', html);
     });
+}
+
+async function vaciarComprobantes() {
+    const pass = prompt('Ingrese contraseña de ADMINISTRACIÓN (ROXANA) para borrar todos los comprobantes:');
+    if (pass === currentAdminPass || pass === 'ROXANA') {
+        let pedidos = getPedidosLocales();
+        pedidos.forEach(p => { p.comprobante_img = null; });
+        savePedidosLocales(pedidos);
+
+        let cortes = JSON.parse(localStorage.getItem('mar_y_sazon_cortes') || '[]');
+        cortes.forEach(c => { c.comprobantes = []; });
+        localStorage.setItem('mar_y_sazon_cortes', JSON.stringify(cortes));
+
+        alert('✅ Memoria de comprobantes limpiada exitosamente.');
+        abrirModalComprobantes();
+    } else {
+        alert('❌ Contraseña incorrecta.');
+    }
 }
 
 function abrirModalHistorial() {
@@ -1006,7 +1028,6 @@ function verDetalleCorte(idx) {
     showModalGen(`Detalle Corte ${c.fecha}`, html);
 }
 
-/* Modificación Directa de Precios desde Administración */
 async function abrirModalPrecios() {
     let html = '<div style="display:flex; flex-direction:column; gap:10px;">';
     
@@ -1367,4 +1388,4 @@ with open('js/admin.js', 'w') as f: f.write(admin_js)
 with open('js/staff.js', 'w') as f: f.write(staff_js)
 with open('js/cocina.js', 'w') as f: f.write(cocina_js)
 
-print("CORTE_Y_PRECIOS_INTEGRADOS_CORRECTAMENTE")
+print("VACIADO_COMPROBANTES_CONFIGURADO")
