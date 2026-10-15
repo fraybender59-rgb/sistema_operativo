@@ -1,42 +1,60 @@
+cat << 'EOF' > admin.html
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Administración</title>
+    <title>Administración - Mar y Sazón</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-    <div class="admin-container">
-        <h1>⚙️ Administración</h1>
-        
-        <section>
-            <h2>Cambiar Fondo</h2>
-            <input type="file" id="bg-upload" accept="image/*">
-        </section>
+    <!-- Modal Login Admin -->
+    <div id="admin-login-modal" class="modal">
+        <div class="modal-content">
+            <h3>🔒 Acceso Restringido</h3>
+            <input type="password" id="admin-pass-input" placeholder="Contraseña Admin">
+            <button class="btn" id="btn-admin-login">Ingresar</button>
+        </div>
+    </div>
 
-        <section>
-            <h2>Meseros (Staff)</h2>
-            <input type="text" id="nombre-mesero" placeholder="Nombre">
-            <button id="btn-agregar-mesero" class="btn">Agregar</button>
-            <ul id="lista-meseros"></ul>
-        </section>
+    <div id="admin-panel" class="admin-grid hidden">
+        <header style="background:none; border:none;">
+            <h1>⚙️ Administración</h1>
+        </header>
 
-        <section>
-            <h2>Almacén</h2>
-            <input type="text" id="prod-nombre" placeholder="Producto">
-            <input type="number" id="prod-cant" placeholder="Cantidad">
-            <input type="number" id="prod-precio" placeholder="Precio">
-            <button id="btn-agregar-prod" class="btn">Sumar</button>
-            <ul id="lista-almacen"></ul>
-        </section>
+        <!-- Ajustes Configuración -->
+        <div class="admin-card">
+            <h3>🔑 Configuración General</h3>
+            <button class="btn btn-warning" id="btn-change-pass">Cambiar Contraseña Admin</button><br><br>
+            <button class="btn" id="btn-change-wa">Cambiar WhatsApp de Recepción</button><br><br>
+            <button class="btn" id="btn-change-bank">Cambiar Cuenta de Transferencia</button>
+        </div>
 
-        <section>
-            <h2>Cobrar Cuentas</h2>
-            <div id="lista-pedidos"></div>
-        </section>
+        <!-- Gestión de Imágenes Slideshow -->
+        <div class="admin-card">
+            <h3>🖼️ Fondo de Clientes (Slideshow)</h3>
+            <input type="file" id="slideshow-input" accept="image/*">
+            <div id="slideshow-preview" style="display:flex; gap:5px; overflow-x:auto; margin-top:10px;"></div>
+        </div>
+
+        <!-- Gestión de Meseros -->
+        <div class="admin-card">
+            <h3>👥 Gestión de Meseros (Max 10)</h3>
+            <input type="text" id="mesero-nombre" placeholder="Nombre Mesero">
+            <input type="password" id="mesero-pass" placeholder="Contraseña Mesero">
+            <input type="text" id="mesero-mesa" placeholder="Mesas Asignadas (Ej. Mesa 1, Mesa 2)">
+            <button class="btn btn-success" id="btn-add-mesero" style="margin-top:8px;">Agregar / Editar Mesero</button>
+            <ul id="lista-meseros" style="list-style:none; padding:0; margin-top:10px;"></ul>
+        </div>
+
+        <!-- Control de Cuentas y Cancelaciones -->
+        <div class="admin-card">
+            <h3>📋 Cuentas Activas y Cancelación</h3>
+            <div id="lista-pedidos-admin"></div>
+        </div>
     </div>
 
     <script type="module" src="js/admin.js"></script>
 </body>
 </html>
+EOF

@@ -1,0 +1,32 @@
+cat << 'EOF' > staff.html
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Punto Staff - Mar y Sazón</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>👨‍🍳 Punto Staff - Meseros</h1>
+    </header>
+
+    <div class="admin-grid">
+        <div class="admin-card">
+            <h3>Identificación de Mesero</h3>
+            <select id="staff-select-mesero"><option value="">Selecciona tu Nombre...</option></select>
+            <input type="password" id="staff-pass" placeholder="Contraseña Mesero" style="margin-top:8px;">
+            <button class="btn" id="btn-staff-login" style="margin-top:8px;">Ver Mis Comandas</button>
+        </div>
+
+        <div id="staff-orders-section" class="admin-card hidden">
+            <h3>Comandas de Mis Mesas</h3>
+            <div id="staff-pedidos-list"></div>
+        </div>
+    </div>
+
+    <script type="module" src="js/staff.js"></script>
+</body>
+</html>
+EOF

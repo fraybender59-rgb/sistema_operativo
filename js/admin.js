@@ -1,81 +1,142 @@
-import { supabase, cargarFondo } from './supabase.js';
+cat << 'EOF' > js/admin.js
+import { supabase, getConfig, setConfig } from './supabase.js';
+
+let currentAdminPass = 'ROXANA';
 
 document.addEventListener('DOMContentLoaded', async () => {
-    await cargarFondo();
-    cargarMeseros();
-    cargarAlmacen();
-    cargarPedidos();
+    const passBD = await getConfig('admin_password');
+    if (passBD) currentAdminPass = passBD;
 
-    // Fondo
-    document.getElementById('bg-upload').addEventListener('change', async (e) => {
+    document.getElementById('btn-admin-login').addEventListener('click', () => {
+        const input = document.getElementById('admin-pass-input').value;
+        if (input === currentAdminPass) {
+            document.getElementById('admin-login-modal').classList.add('hidden');
+            document.getElementById('admin-panel').classList.remove('hidden');
+            cargarModuloAdmin();
+        } else {
+            alert('Contraseña incorrecta');
+        }
+    });
+});
+
+async function cargarModuloAdmin() {
+    cargarMeseros();
+    cargarPedidosAdmin();
+    cargarSlideshowPreview();
+
+    document.getElementById('btn-change-pass').addEventListener('click', async () => {
+        const newPass = prompt('Ingrese la NUEVA contraseña de administración:');
+        if (newPass) {
+            await setConfig('admin_password', newPass);
+            currentAdminPass = newPass;
+            alert('Contraseña de administración actualizada.');
+        }
+    });
+
+    document.getElementById('btn-change-wa').addEventListener('click', async () => {
+        const newWa = prompt('Ingrese el nuevo número de WhatsApp (10 dígitos):');
+        if (newWa) {
+            await setConfig('whatsapp_num', newWa);
+            alert('Número de WhatsApp actualizado.');
+        }
+    });
+
+    document.getElementById('btn-change-bank').addEventListener('click', async () => {
+        const newBank = prompt('Ingrese la nueva cuenta bancaria para transferencias:');
+        if (newBank) {
+            await setConfig('cuenta_transferencia', newBank);
+            alert('Cuenta bancaria actualizada.');
+        }
+    });
+
+    document.getElementById('btn-add-mesero').addEventListener('click', async () => {
+        const nombre = document.getElementById('mesero-nombre').value;
+        const pass = document.getElementById('mesero-pass').value;
+        const mesa = document.getElementById('mesero-mesa').value;
+
+        if (!nombre || !pass) return alert('Completa nombre y contraseña del mesero.');
+
+        const { count } = await supabase.from('meseros').select('*', { count: 'exact' });
+        if (count >= 10) return alert('Límite de 10 meseros alcanzado.');
+
+        await supabase.from('meseros').insert([{ nombre, password: pass, mesas_asignadas: mesa }]);
+        document.getElementById('mesero-nombre').value = '';
+        document.getElementById('mesero-pass').value = '';
+        document.getElementById('mesero-mesa').value = '';
+        cargarMeseros();
+    });
+
+    document.getElementById('slideshow-input').addEventListener('change', async (e) => {
         const file = e.target.files[0];
         if (!file) return;
         const reader = new FileReader();
         reader.onloadend = async () => {
-            const base64String = reader.result;
-            await supabase.from('configuracion').update({ valor: base64String }).eq('clave', 'fondo_app');
-            alert('Fondo actualizado.');
-            cargarFondo();
+            const raw = await getConfig('fondo_slideshow');
+            let imgs = raw ? JSON.parse(raw) : [];
+            imgs.push(reader.result);
+            await setConfig('fondo_slideshow', JSON.stringify(imgs));
+            cargarSlideshowPreview();
         };
         reader.readAsDataURL(file);
     });
+}
 
-    // Meseros
-    document.getElementById('btn-agregar-mesero').addEventListener('click', async () => {
-        const nombre = document.getElementById('nombre-mesero').value;
-        if (!nombre) return;
-        await supabase.from('meseros').insert([{ nombre }]);
+async function cargarMeseros() {
+    const { data } = await supabase.from('meseros').select('*');
+    const ul = document.getElementById('lista-meseros');
+    ul.innerHTML = data.map(m => `
+        <li style="background:#0f172a; padding:8px; margin-bottom:5px; border-radius:5px; display:flex; justify-content:space-between; align-items:center;">
+            <span>👨‍🍳 <b>${m.nombre}</b> (${m.mesas_asignadas || 'Sin mesa'})</span>
+            <button class="btn btn-danger" style="width:auto; padding:4px 8px;" onclick="eliminarMesero(${m.id})">Borrar</button>
+        </li>
+    `).join('');
+}
+
+window.eliminarMesero = async (id) => {
+    const p = prompt(`Ingrese contraseña de administración para eliminar mesero:`);
+    if (p === currentAdminPass) {
+        await supabase.from('meseros').delete().eq('id', id);
         cargarMeseros();
-    });
+    } else alert('Contraseña incorrecta.');
+};
 
-    async function cargarMeseros() {
-        const { data } = await supabase.from('meseros').select('*');
-        const lista = document.getElementById('lista-meseros');
-        lista.innerHTML = data.map(m => `<li>${m.nombre}</li>`).join('');
-    }
+async function cargarSlideshowPreview() {
+    const raw = await getConfig('fondo_slideshow');
+    let imgs = raw ? JSON.parse(raw) : [];
+    const prev = document.getElementById('slideshow-preview');
+    prev.innerHTML = imgs.map((img, idx) => `
+        <div style="position:relative;">
+            <img src="${img}" style="width:60px; height:60px; object-fit:cover; border-radius:5px;">
+            <button onclick="borrarImgSlide(${idx})" style="position:absolute; top:0; right:0; background:red; color:white; border:none; border-radius:50%;">x</button>
+        </div>
+    `).join('');
+}
 
-    // Almacén
-    document.getElementById('btn-agregar-prod').addEventListener('click', async () => {
-        const nombre = document.getElementById('prod-nombre').value;
-        const cant = document.getElementById('prod-cant').value;
-        const precio = document.getElementById('prod-precio').value;
-        if (!nombre || !cant || !precio) return;
-        await supabase.from('almacen').insert([{ nombre_producto: nombre, cantidad: cant, precio: precio }]);
-        cargarAlmacen();
-    });
+window.borrarImgSlide = async (idx) => {
+    const raw = await getConfig('fondo_slideshow');
+    let imgs = raw ? JSON.parse(raw) : [];
+    imgs.splice(idx, 1);
+    await setConfig('fondo_slideshow', JSON.stringify(imgs));
+    cargarSlideshowPreview();
+};
 
-    async function cargarAlmacen() {
-        const { data } = await supabase.from('almacen').select('*');
-        const lista = document.getElementById('lista-almacen');
-        lista.innerHTML = data.map(p => `<li>${p.nombre_producto} - Quedan: ${p.cantidad} - $${p.precio}</li>`).join('');
-    }
+async function cargarPedidosAdmin() {
+    const { data } = await supabase.from('pedidos').select('*').order('id', { ascending: false });
+    const div = document.getElementById('lista-pedidos-admin');
+    div.innerHTML = data.map(p => `
+        <div style="background:#0f172a; padding:10px; margin-bottom:8px; border-radius:6px;">
+            <b>#${p.id} - ${p.cliente_mesa}</b> | Total: $${p.total} | Estado: <span style="color:#f59e0b;">${p.estado}</span><br>
+            <button class="btn btn-danger" style="margin-top:5px;" onclick="cancelarPedidoAdmin(${p.id})">Cancelar Pedido</button>
+        </div>
+    `).join('');
+}
 
-    // Pedidos y Cobro
-    async function cargarPedidos() {
-        const { data } = await supabase.from('pedidos').select('*').eq('estado', 'pendiente');
-        const lista = document.getElementById('lista-pedidos');
-        lista.innerHTML = data.map(p => `
-            <div>
-                Mesa: ${p.cliente_mesa} - Total: $${p.total}
-                <button onclick="cobrar(${p.id}, 'efectivo')">Efectivo</button>
-                <button onclick="cobrar(${p.id}, 'transferencia')">Transf.</button>
-                <button onclick="cobrarEspecial(${p.id}, 'cancelacion')">Cancelar</button>
-            </div>
-        `).join('');
-    }
-
-    window.cobrar = async (id, metodo) => {
-        await supabase.from('pedidos').update({estado: 'cobrado', metodo_pago: metodo}).eq('id', id);
-        cargarPedidos();
-    };
-
-    window.cobrarEspecial = async (id, metodo) => {
-        const pass = prompt(`Contraseña para ${metodo}:`);
-        if(pass === 'IBARRITA'){
-            await supabase.from('pedidos').update({estado: metodo, metodo_pago: metodo}).eq('id', id);
-            cargarPedidos();
-        } else {
-            alert('Contraseña incorrecta');
-        }
-    };
-});
+window.cancelarPedidoAdmin = async (id) => {
+    const p = prompt('Ingrese contraseña de administración (ROXANA) para cancelar pedido:');
+    if (p === currentAdminPass) {
+        await supabase.from('pedidos').update({ estado: 'cancelado' }).eq('id', id);
+        alert('Pedido cancelado.');
+        cargarPedidosAdmin();
+    } else alert('Contraseña incorrecta.');
+};
+EOF
