@@ -6,6 +6,98 @@ if (window.supabase && window.supabase.createClient) {
     _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 }
 
+// Auxiliares de Sincronización Local + Remota
+function getPedidosLocales() {
+    try {
+        return JSON.parse(localStorage.getItem('mar_y_sazon_pedidos') || '[]');
+    } catch(e) { return []; }
+}
+
+function savePedidosLocales(pedidos) {
+    localStorage.setItem('mar_y_sazon_pedidos', JSON.stringify(pedidos));
+}
+
+async function guardarPedidoSync(pedido) {
+    let pedidos = getPedidosLocales();
+    pedidos.unshift(pedido);
+    savePedidosLocales(pedidos);
+
+    if (_supabase) {
+        try {
+            const { data, error } = await _supabase.from('pedidos').insert([{
+                cliente_mesa: pedido.cliente_mesa,
+                mesero_nombre: pedido.mesero_nombre,
+                total: pedido.total,
+                estado: pedido.estado,
+                metodo_pago: pedido.metodo_pago,
+                origen: pedido.origen,
+                creado_en: pedido.creado_en
+            }]).select();
+
+            if (data && data.length > 0) {
+                const pId = data[0].id;
+                pedido.id = pId;
+                const detalles = pedido.detalles.map(d => ({
+                    pedido_id: pId,
+                    producto_nombre: d.nombre,
+                    precio: d.precio,
+                    cantidad: d.cantidad,
+                    comentario: d.comentario
+                }));
+                await _supabase.from('detalles_pedido').insert(detalles);
+                savePedidosLocales(pedidos);
+            }
+        } catch(e) { console.warn('Guardado en respaldo local:', e); }
+    }
+}
+
+async function obtenerPedidosSync() {
+    let locales = getPedidosLocales();
+    if (_supabase) {
+        try {
+            const { data } = await _supabase.from('pedidos').select('*, detalles_pedido(*)').order('id', { ascending: false });
+            if (data && data.length > 0) {
+                const remotos = data.map(p => ({
+                    id: p.id,
+                    cliente_mesa: p.cliente_mesa,
+                    mesero_nombre: p.mesero_nombre || 'General',
+                    total: parseFloat(p.total),
+                    estado: p.estado,
+                    metodo_pago: p.metodo_pago,
+                    origen: p.origen || 'Clientes',
+                    creado_en: p.creado_en,
+                    detalles: (p.detalles_pedido || []).map(d => ({
+                        nombre: d.producto_nombre,
+                        precio: parseFloat(d.precio),
+                        cantidad: d.cantidad,
+                        comentario: d.comentario
+                    }))
+                }));
+                savePedidosLocales(remotos);
+                return remotos;
+            }
+        } catch(e){}
+    }
+    return locales;
+}
+
+async function actualizarEstadoPedidoSync(id, nuevoEstado, metodoPago = null) {
+    let locales = getPedidosLocales();
+    let target = locales.find(p => p.id == id);
+    if (target) {
+        target.estado = nuevoEstado;
+        if (metodoPago) target.metodo_pago = metodoPago;
+        savePedidosLocales(locales);
+    }
+    if (_supabase) {
+        try {
+            let updatePayload = { estado: nuevoEstado };
+            if (metodoPago) updatePayload.metodo_pago = metodoPago;
+            await _supabase.from('pedidos').update(updatePayload).eq('id', id);
+        } catch(e){}
+    }
+}
+
 async function getConfig(clave, defaultValue = '') {
     if (!_supabase) return localStorage.getItem(clave) || defaultValue;
     try {

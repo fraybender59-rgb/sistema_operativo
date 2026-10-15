@@ -12,15 +12,19 @@
         <h1>👨‍🍳 Punto Staff - Meseros</h1>
     </header>
 
-    <div class="admin-grid">
+    <div class="admin-grid" style="max-width:500px; margin:20px auto; padding:15px;">
         <div class="admin-card">
             <h3>Identificación de Mesero</h3>
             <select id="staff-select-mesero"><option value="">Selecciona tu Nombre...</option></select>
             <input type="password" id="staff-pass" placeholder="Contraseña Mesero" style="margin-top:8px;">
-            <button class="btn btn-success" onclick="loginStaff()" style="margin-top:8px;">Ver Mis Comandas</button>
+            <button class="btn btn-success" onclick="loginStaff()" style="margin-top:8px;">Ingresar a Tomar Pedidos</button>
         </div>
 
         <div id="staff-orders-section" class="admin-card hidden">
+            <h3>📝 Tomar Nuevo Pedido</h3>
+            <input type="text" id="staff-cliente" placeholder="Mesa / Nombre del Cliente">
+            <button class="btn" style="margin-top:8px;" onclick="irAComanderoStaff()">Ir al Menú de Mesero</button>
+            <hr>
             <h3>Comandas de Mis Mesas</h3>
             <div id="staff-pedidos-list"></div>
         </div>

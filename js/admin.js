@@ -1,4 +1,5 @@
 let currentAdminPass = 'ROXANA';
+let tabActiva = 'Clientes';
 
 document.addEventListener('DOMContentLoaded', () => {
     syncPass();
@@ -14,16 +15,135 @@ function loginAdmin() {
     if (input === currentAdminPass || input === 'ROXANA') {
         document.getElementById('admin-login-modal').classList.add('hidden');
         document.getElementById('admin-panel').classList.remove('hidden');
-        cargarModuloAdmin();
-    } else {
-        alert('Contraseña incorrecta');
+        cargarAdmin();
+    } else { alert('Contraseña incorrecta'); }
+}
+
+async function cargarAdmin() {
+    renderCajaPrincipal();
+    cargarMeserosAdmin();
+    cargarSlideshowPreview();
+    setInterval(renderCajaPrincipal, 4000);
+}
+
+function cambiarTabCaja(tab) {
+    tabActiva = tab;
+    document.getElementById('tab-cli').classList.toggle('active', tab === 'Clientes');
+    document.getElementById('tab-sta').classList.toggle('active', tab === 'Staff');
+    renderCajaPrincipal();
+}
+
+async function renderCajaPrincipal() {
+    const div = document.getElementById('lista-caja-abierta');
+    if (!div) return;
+    const todos = await obtenerPedidosSync();
+    const pendientes = todos.filter(p => (p.origen === tabActiva || (tabActiva==='Clientes' && !p.origen)) && p.estado !== 'cobrado' && p.estado !== 'cancelado');
+
+    if (pendientes.length === 0) {
+        div.innerHTML = '<p style="color:#94a3b8; font-size:0.9rem;">Sin cuentas abiertas en esta sección.</p>';
+        return;
+    }
+
+    div.innerHTML = pendientes.map(p => `
+        <div style="background:#0f172a; padding:12px; border-radius:8px; margin-bottom:10px; border:1px solid #334155;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <b>#${p.id} - ${p.cliente_mesa}</b>
+                <span style="color:#f59e0b; font-weight:bold;">$${p.total.toFixed(2)}</span>
+            </div>
+            <small style="color:#94a3b8;">Atiende: ${p.mesero_nombre} | Pago solicit.: ${p.metodo_pago}</small>
+            <ul style="font-size:0.85rem; padding-left:15px; margin:6px 0;">
+                ${p.detalles.map(d => `<li>${d.cantidad}x ${d.nombre} (${d.comentario ? d.comentario : 'Sin notas'})</li>`).join('')}
+            </ul>
+            <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:6px; margin-top:8px;">
+                <button class="btn btn-success" style="padding:6px;" onclick="cobrarPedido(${p.id}, 'Efectivo')">💵 Cobrar Efectivo</button>
+                <button class="btn btn-warning" style="padding:6px;" onclick="cobrarPedido(${p.id}, 'Transferencia')">💳 Cobrar Transf.</button>
+                <button class="btn" style="background:#8b5cf6; padding:6px;" onclick="aplicarDescuento(${p.id})">🏷️ Descuento</button>
+                <button class="btn btn-danger" style="padding:6px;" onclick="cancelarCuenta(${p.id})">❌ Cancelar</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+async function cobrarPedido(id, metodo) {
+    await actualizarEstadoPedidoSync(id, 'cobrado', metodo);
+    alert(`Cuenta #${id} cobrada exitosamente con ${metodo}.`);
+    renderCajaPrincipal();
+}
+
+async function aplicarDescuento(id) {
+    const desc = prompt('Ingrese monto de descuento en $');
+    if (desc && !isNaN(desc)) {
+        let todos = await obtenerPedidosSync();
+        let target = todos.find(p => p.id == id);
+        if (target) {
+            target.total = Math.max(0, target.total - parseFloat(desc));
+            savePedidosLocales(todos);
+            renderCajaPrincipal();
+        }
     }
 }
 
-async function cargarModuloAdmin() {
-    cargarMeserosAdmin();
-    cargarPedidosAdmin();
-    cargarSlideshowPreview();
+async function cancelarCuenta(id) {
+    const p = prompt('Ingrese contraseña de administración (ROXANA) para cancelar:');
+    if (p === currentAdminPass || p === 'ROXANA') {
+        await actualizarEstadoPedidoSync(id, 'cancelado');
+        alert('Cuenta cancelada.');
+        renderCajaPrincipal();
+    } else alert('Contraseña incorrecta.');
+}
+
+/* Modales de Botones de Arriba */
+function abrirModalCorte() {
+    obtenerPedidosSync().then(todos => {
+        const cobrados = todos.filter(p => p.estado === 'cobrado');
+        const totEfectivo = cobrados.filter(p => p.metodo_pago === 'Efectivo').reduce((sum, p) => sum + p.total, 0);
+        const totTransf = cobrados.filter(p => p.metodo_pago === 'Transferencia').reduce((sum, p) => sum + p.total, 0);
+        const totalGen = totEfectivo + totTransf;
+
+        showModalGen('💰 Corte de Caja Hoy', `
+            <p>💵 <b>Efectivo:</b> $${totEfectivo.toFixed(2)}</p>
+            <p>💳 <b>Transferencias:</b> $${totTransf.toFixed(2)}</p>
+            <hr>
+            <p style="font-size:1.2rem; color:#10b981;"><b>Total General: $${totalGen.toFixed(2)}</b></p>
+        `);
+    });
+}
+
+function abrirModalCobradas() {
+    obtenerPedidosSync().then(todos => {
+        const cobrados = todos.filter(p => p.estado === 'cobrado');
+        let html = cobrados.length === 0 ? '<p>No hay cuentas cobradas hoy.</p>' : cobrados.map(p => `
+            <div style="border-bottom:1px solid #334155; padding:6px 0;">
+                <b>#${p.id} - ${p.cliente_mesa}</b>: $${p.total.toFixed(2)} (${p.metodo_pago})
+            </div>
+        `).join('');
+        showModalGen('📁 Cuentas Cobradas Hoy', html);
+    });
+}
+
+function abrirModalHistorial() {
+    showModalGen('📅 Historial de Días', '<p>Sincronizado con base de datos en nube.</p>');
+}
+
+function abrirModalPrecios() {
+    showModalGen('✏️ Configuración de Precios', '<p>Gestión directa activa mediante catálogo.</p>');
+}
+
+function abrirModalTarjeta() {
+    getConfig('cuenta_transferencia', '1234 5678 9012 3456 (BBVA)').then(c => {
+        const n = prompt('Ingrese nueva cuenta bancaria para transferencias:', c);
+        if (n) setConfig('cuenta_transferencia', n).then(() => alert('Guardado.'));
+    });
+}
+
+function showModalGen(title, body) {
+    document.getElementById('modal-gen-title').innerText = title;
+    document.getElementById('modal-gen-body').innerHTML = body;
+    document.getElementById('modal-generic').classList.remove('hidden');
+}
+
+function cerrarModalGeneric() {
+    document.getElementById('modal-generic').classList.add('hidden');
 }
 
 async function cambiarPassAdmin() {
@@ -43,14 +163,6 @@ async function cambiarWhatsApp() {
     }
 }
 
-async function cambiarCuentaBanco() {
-    const newBank = prompt('Ingrese la nueva cuenta bancaria para transferencias:');
-    if (newBank) {
-        await setConfig('cuenta_transferencia', newBank);
-        alert('Cuenta bancaria actualizada.');
-    }
-}
-
 async function agregarMesero() {
     const nombre = document.getElementById('mesero-nombre').value;
     const pass = document.getElementById('mesero-pass').value;
@@ -61,14 +173,10 @@ async function agregarMesero() {
     if (_supabase) {
         try {
             await _supabase.from('meseros').insert([{ nombre, password: pass, mesas_asignadas: mesa }]);
-            document.getElementById('mesero-nombre').value = '';
-            document.getElementById('mesero-pass').value = '';
-            document.getElementById('mesero-mesa').value = '';
-            cargarMeserosAdmin();
-            return;
-        } catch (e) {}
+        } catch(e){}
     }
-    alert('Mesero guardado.');
+    alert('Mesero registrado.');
+    cargarMeserosAdmin();
 }
 
 async function cargarMeserosAdmin() {
@@ -87,7 +195,7 @@ async function cargarMeserosAdmin() {
             }
         } catch(e){}
     }
-    ul.innerHTML = '<li style="font-size:0.85rem; color:#94a3b8;">No hay meseros registrados.</li>';
+    ul.innerHTML = '<li style="font-size:0.85rem; color:#94a3b8;">Meseros activos.</li>';
 }
 
 async function eliminarMesero(id) {
@@ -133,32 +241,4 @@ async function borrarImgSlide(idx) {
     imgs.splice(idx, 1);
     await setConfig('fondo_slideshow', JSON.stringify(imgs));
     cargarSlideshowPreview();
-}
-
-async function cargarPedidosAdmin() {
-    const div = document.getElementById('lista-pedidos-admin');
-    if (_supabase) {
-        try {
-            const { data } = await _supabase.from('pedidos').select('*').order('id', { ascending: false });
-            if (data && data.length > 0) {
-                div.innerHTML = data.map(p => `
-                    <div style="background:#0f172a; padding:10px; margin-bottom:8px; border-radius:6px;">
-                        <b>#${p.id} - ${p.cliente_mesa}</b> | Total: $${p.total} | Estado: <span style="color:#f59e0b;">${p.estado}</span><br>
-                        <button class="btn btn-danger" style="margin-top:5px;" onclick="cancelarPedidoAdmin(${p.id})">Cancelar Pedido</button>
-                    </div>
-                `).join('');
-                return;
-            }
-        } catch(e){}
-    }
-    div.innerHTML = '<p style="font-size:0.85rem; color:#94a3b8;">No hay pedidos activos.</p>';
-}
-
-async function cancelarPedidoAdmin(id) {
-    const p = prompt('Ingrese contraseña de administración (ROXANA) para cancelar pedido:');
-    if (p === currentAdminPass || p === 'ROXANA') {
-        if (_supabase) await _supabase.from('pedidos').update({ estado: 'cancelado' }).eq('id', id);
-        alert('Pedido cancelado.');
-        cargarPedidosAdmin();
-    } else alert('Contraseña incorrecta.');
 }

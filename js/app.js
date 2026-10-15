@@ -109,12 +109,12 @@ async function cargarMeseros() {
         try {
             const { data } = await _supabase.from('meseros').select('*');
             if (data && data.length > 0) {
-                data.forEach(m => select.innerHTML += `<option value="${m.id}">${m.nombre}</option>`);
+                data.forEach(m => select.innerHTML += `<option value="${m.nombre}">${m.nombre}</option>`);
                 return;
             }
         } catch(e){}
     }
-    select.innerHTML += '<option value="1">Mesero General</option>';
+    select.innerHTML += '<option value="Luis">Luis</option><option value="Ana">Ana</option>';
 }
 
 async function cargarCuentaTransferencia() {
@@ -138,36 +138,32 @@ async function iniciarSlideshow() {
 
 async function enviarPedido() {
     const cliente = document.getElementById('nombre-cliente').value;
-    const mesero_id = document.getElementById('select-mesero').value;
+    const mesero_nombre = document.getElementById('select-mesero').value || 'Cliente Web';
     const metodo_pago = document.getElementById('metodo-pago').value;
 
     if (!cliente || carrito.length === 0) return alert('Ingresa Nombre/Mesa y agrega platillos al pedido.');
 
     const total = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
 
-    if (_supabase) {
-        try {
-            const { data: pedidoData } = await _supabase.from('pedidos')
-                .insert([{ cliente_mesa: cliente, mesero_id: mesero_id || null, total, metodo_pago, estado: 'pendiente' }]).select();
+    const nuevoPedido = {
+        id: Date.now(),
+        cliente_mesa: cliente,
+        mesero_nombre: mesero_nombre,
+        total: total,
+        estado: 'pendiente',
+        metodo_pago: metodo_pago,
+        origen: 'Clientes',
+        creado_en: new Date().toISOString(),
+        detalles: [...carrito]
+    };
 
-            if (pedidoData && pedidoData.length > 0) {
-                const pedidoId = pedidoData[0].id;
-                const detalles = carrito.map(i => ({
-                    pedido_id: pedidoId,
-                    producto_nombre: i.nombre,
-                    precio: i.precio,
-                    cantidad: i.cantidad,
-                    comentario: i.comentario
-                }));
-                await _supabase.from('detalles_pedido').insert(detalles);
-            }
-        } catch (e) {}
-    }
+    await guardarPedidoSync(nuevoPedido);
 
     const waNum = await getConfig('whatsapp_num', '5554746310');
     let msg = `🌊 *NUEVO PEDIDO - MAR Y SAZÓN*
 
 📌 *Cliente/Mesa:* ${cliente}
+👨‍🍳 *Atiende:* ${mesero_nombre}
 💳 *Pago:* ${metodo_pago}
 
 *Detalles:*
