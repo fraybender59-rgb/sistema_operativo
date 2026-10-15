@@ -1,7 +1,7 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
 
-const supabaseUrl = 'https://TU_URL_DE_SUPABASE.supabase.co'
-const supabaseKey = 'TU_CLAVE_ANONIMA'
+const supabaseUrl = 'https://atwtmuqkqypdodbhkrbe.supabase.co'
+const supabaseKey = 'Sb_publishable_MEy55fYU0IPdivDrbnWgsA_75__Y_Uoy'
 export const supabase = createClient(supabaseUrl, supabaseKey)
 
 // Función para cambiar la imagen de fondo desde la base de datos
