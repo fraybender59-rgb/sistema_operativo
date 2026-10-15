@@ -40,18 +40,31 @@ header {
     text-align: center; font-size: 0.85rem; border-bottom: 1px solid #d97706;
 }
 
+.promo-banner {
+    width: 100%; height: 160px; border-radius: 12px; overflow: hidden;
+    position: relative; margin-bottom: 15px; border: 1px solid #334155;
+    background-size: cover; background-position: center;
+    transition: background-image 0.8s ease-in-out;
+}
+
+.promo-overlay {
+    position: absolute; bottom: 0; left: 0; width: 100%;
+    background: linear-gradient(transparent, rgba(15,23,42,0.9));
+    padding: 10px; box-sizing: border-box; text-align: center;
+}
+
 .categories { display: flex; gap: 8px; overflow-x: auto; padding: 10px 5px; }
 .cat-btn { background: #334155; color: #fff; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; white-space: nowrap; }
 .cat-btn.active { background: var(--primary); font-weight: bold; }
 
-.menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; padding: 15px; margin-bottom: 170px; }
+.menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; padding: 0 0 170px 0; }
 .menu-card { 
     background: var(--card); border-radius: 12px; text-align: center; 
     border: 1px solid #334155; cursor: pointer; display: flex; flex-direction: column; 
     justify-content: space-between; overflow: hidden; transition: transform 0.2s;
 }
 .menu-card:active { transform: scale(0.98); }
-.menu-card-img { width: 100%; height: 110px; object-fit: cover; }
+.menu-card-img { width: 100%; height: 110px; object-fit: cover; display: block; border-bottom: 1px solid #334155; }
 .menu-card-body { padding: 10px; display: flex; flex-direction: column; justify-content: space-between; flex-grow: 1; }
 .menu-card h3 { margin: 4px 0; font-size: 0.95rem; color: #f8fafc; }
 .menu-card .price { color: var(--accent); font-weight: bold; font-size: 1.1rem; margin-top: 6px; }
@@ -93,7 +106,6 @@ input, select, textarea { padding: 10px; border-radius: 6px; border: 1px solid #
 .timer-yellow { background-color: #f59e0b; color: #000; }
 .timer-red { background-color: #ef4444; color: #fff; animation: pulse 1s infinite alternate; }
 
-/* Modal Promociones Slider */
 .promo-slider-img { width: 100%; height: 220px; object-fit: cover; border-radius: 10px; border: 1px solid #334155; }
 
 @keyframes pulse { from { opacity: 1; } to { opacity: 0.6; } }
@@ -241,15 +253,15 @@ index_html = '''<!DOCTYPE html>
     <!-- Modal Promociones Iniciales -->
     <div id="modal-promo-bienvenida" class="modal">
         <div class="modal-content" style="text-align:center;">
-            <h2 style="margin:0; color:var(--accent);">🌊 Promociones Mar y Sazón</h2>
-            <p style="font-size:0.85rem; color:#94a3b8; margin:4px 0 10px 0;">Conoce nuestras especialidades del día:</p>
-            <img id="promo-slide-img" class="promo-slider-img" src="https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=600&q=80" alt="Promoción">
+            <h2 style="margin:0; color:var(--accent);">🌊 Especialidades Mar y Sazón</h2>
+            <p style="font-size:0.85rem; color:#94a3b8; margin:4px 0 10px 0;">¡Promociones frescas del día!</p>
+            <img id="promo-slide-img" class="promo-slider-img" src="https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=600&auto=format&fit=crop&q=80" alt="Promoción">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
                 <button class="btn" style="width:auto; padding:8px 16px;" onclick="cambiarFotoPromo(-1)">⬅️ Anterior</button>
                 <span id="promo-num" style="font-size:0.9rem; font-weight:bold;">1 / 3</span>
                 <button class="btn" style="width:auto; padding:8px 16px;" onclick="cambiarFotoPromo(1)">Siguiente ➡️</button>
             </div>
-            <button class="btn btn-success" style="margin-top:12px; padding:12px; font-size:1rem;" onclick="cerrarPromoBienvenida()">🌊 Ver Menú y Hacer Pedido</button>
+            <button class="btn btn-success" style="margin-top:12px; padding:12px; font-size:1rem;" onclick="cerrarPromoBienvenida()">🌊 Entrar al Menú</button>
         </div>
     </div>
 
@@ -258,14 +270,20 @@ index_html = '''<!DOCTYPE html>
     </div>
 
     <header>
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h1 style="margin:0; font-size:1.3rem;">🌊 Mar y Sazón</h1>
-            <button class="btn btn-danger" style="width:auto; padding:6px 12px; font-size:0.8rem;" onclick="abrirCancelacionAdmin()">❌ Cancelar Comanda</button>
-        </div>
+        <h1 style="margin:0; font-size:1.4rem; text-align:center;">🌊 Mar y Sazón</h1>
         <div class="categories" id="cat-container" style="margin-top:8px;"></div>
     </header>
 
-    <main class="menu-grid" id="menu-items"></main>
+    <main style="padding: 15px;">
+        <!-- Banner Carrusel Promociones -->
+        <div id="top-promo-banner" class="promo-banner" style="background-image: url('https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=600&auto=format&fit=crop&q=80');">
+            <div class="promo-overlay">
+                <span style="color:var(--accent); font-weight:bold; font-size:0.9rem;">🔥 Promoción Mar y Sazón</span>
+            </div>
+        </div>
+
+        <div class="menu-grid" id="menu-items"></div>
+    </main>
 
     <footer class="cart-footer">
         <input type="text" id="nombre-cliente" placeholder="Mesa / Nombre del Cliente">
@@ -304,43 +322,31 @@ index_html = '''<!DOCTYPE html>
         </div>
     </div>
 
-    <!-- Modal Cancelación -->
-    <div id="modal-cancel-admin" class="modal hidden">
-        <div class="modal-content">
-            <h3>🔒 Cancelación de Comandas</h3>
-            <p style="font-size:0.85rem; color:#94a3b8; margin:0;">Ingrese contraseña de administración para autorizar cancelación:</p>
-            <input type="password" id="input-cancel-pass" placeholder="Contraseña Admin">
-            <button class="btn btn-warning" onclick="verificarPassCancel()">Verificar Autorización</button>
-            <div id="lista-cancel-pedidos" class="hidden" style="margin-top:10px;"></div>
-            <button class="btn btn-danger" onclick="cerrarModalCancel()">Cerrar</button>
-        </div>
-    </div>
-
     <script src="js/supabase_config.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>'''
 
 app_js = '''const MENU_DEFAULT = [
-    { id: 1, categoria: 'Cócteles', nombre: 'Cóctel de Camarón Grande', descripcion: 'Cóctel grande preparado con camarón fresco', precio: 150.00, img: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=400&q=80' },
-    { id: 2, categoria: 'Cócteles', nombre: 'Cóctel camaron chico', descripcion: 'Cóctel chico de camarón fresco', precio: 120.00, img: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=400&q=80' },
-    { id: 3, categoria: 'Céviches', nombre: 'Ceviche de Camarón grande', descripcion: 'Ceviche fresco de camarón picado', precio: 140.00, img: 'https://images.unsplash.com/photo-1535399831218-d5bd36d1a6b3?auto=format&fit=crop&w=400&q=80' },
-    { id: 4, categoria: 'Céviches', nombre: 'Ceviche de Camarones chico', descripcion: 'Porción chica de ceviche de camarón', precio: 110.00, img: 'https://images.unsplash.com/photo-1535399831218-d5bd36d1a6b3?auto=format&fit=crop&w=400&q=80' },
-    { id: 5, categoria: 'Céviches', nombre: 'Ceviche de pescado grande', descripcion: 'Ceviche tradicional de pescado fresco', precio: 130.00, img: 'https://images.unsplash.com/photo-1535399831218-d5bd36d1a6b3?auto=format&fit=crop&w=400&q=80' },
-    { id: 6, categoria: 'Céviches', nombre: 'Ceviche de pescado chic', descripcion: 'Porción chica de ceviche de pescado', precio: 130.00, img: 'https://images.unsplash.com/photo-1535399831218-d5bd36d1a6b3?auto=format&fit=crop&w=400&q=80' },
-    { id: 7, categoria: 'Aguachiles', nombre: 'Aguachile de Camarón', descripcion: 'Camarones curtidos en limón y chile', precio: 80.00, img: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=400&q=80' },
-    { id: 8, categoria: 'Aguachiles', nombre: 'Aguachile de Pescado', descripcion: 'Pescado fresco curtido en limón', precio: 70.00, img: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=400&q=80' },
-    { id: 9, categoria: 'Tacos', nombre: 'orden tacos gobernador (4 tacos)', descripcion: '4 tacos gobernador con camarón y queso', precio: 220.00, img: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=400&q=80' },
-    { id: 10, categoria: 'Tacos', nombre: 'Orden tacos estilo baja (4 tacos)', descripcion: '4 tacos de pescado capeado estilo Baja', precio: 200.00, img: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=400&q=80' },
-    { id: 11, categoria: 'Combos', nombre: 'Combo Tacos Gobernador + Corona', descripcion: '4 Tacos Gobernador + 1 Cerveza Corona', precio: 220.00, img: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=400&q=80' },
-    { id: 12, categoria: 'Combos', nombre: 'Combo Cóctel Camarón + Corona', descripcion: '1 Cóctel de Camarón + 1 Cerveza Corona', precio: 160.00, img: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=400&q=80' },
-    { id: 13, categoria: 'Combos', nombre: 'Combo Aguachile Camarón + Corona', descripcion: '1 Aguachile de Camarón + 1 Cerveza Corona', precio: 100.00, img: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=400&q=80' }
+    { id: 1, categoria: 'Cócteles', nombre: 'Cóctel de Camarón Grande', descripcion: 'Cóctel grande preparado con camarón fresco', precio: 150.00, img: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=500&auto=format&fit=crop&q=80' },
+    { id: 2, categoria: 'Cócteles', nombre: 'Cóctel camaron chico', descripcion: 'Cóctel chico de camarón fresco', precio: 120.00, img: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=500&auto=format&fit=crop&q=80' },
+    { id: 3, categoria: 'Céviches', nombre: 'Ceviche de Camarón grande', descripcion: 'Ceviche fresco de camarón picado', precio: 140.00, img: 'https://images.unsplash.com/photo-1535399831218-d5bd36d1a6b3?w=500&auto=format&fit=crop&q=80' },
+    { id: 4, categoria: 'Céviches', nombre: 'Ceviche de Camarones chico', descripcion: 'Porción chica de ceviche de camarón', precio: 110.00, img: 'https://images.unsplash.com/photo-1535399831218-d5bd36d1a6b3?w=500&auto=format&fit=crop&q=80' },
+    { id: 5, categoria: 'Céviches', nombre: 'Ceviche de pescado grande', descripcion: 'Ceviche tradicional de pescado fresco', precio: 130.00, img: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=500&auto=format&fit=crop&q=80' },
+    { id: 6, categoria: 'Céviches', nombre: 'Ceviche de pescado chic', descripcion: 'Porción chica de ceviche de pescado', precio: 130.00, img: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=500&auto=format&fit=crop&q=80' },
+    { id: 7, categoria: 'Aguachiles', nombre: 'Aguachile de Camarón', descripcion: 'Camarones curtidos en limón y chile', precio: 80.00, img: 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=500&auto=format&fit=crop&q=80' },
+    { id: 8, categoria: 'Aguachiles', nombre: 'Aguachile de Pescado', descripcion: 'Pescado fresco curtido en limón', precio: 70.00, img: 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=500&auto=format&fit=crop&q=80' },
+    { id: 9, categoria: 'Tacos', nombre: 'orden tacos gobernador (4 tacos)', descripcion: '4 tacos gobernador con camarón y queso', precio: 220.00, img: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=500&auto=format&fit=crop&q=80' },
+    { id: 10, categoria: 'Tacos', nombre: 'Orden tacos estilo baja (4 tacos)', descripcion: '4 tacos de pescado capeado estilo Baja', precio: 200.00, img: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=500&auto=format&fit=crop&q=80' },
+    { id: 11, categoria: 'Combos', nombre: 'Combo Tacos Gobernador + Corona', descripcion: '4 Tacos Gobernador + 1 Cerveza Corona', precio: 220.00, img: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=500&auto=format&fit=crop&q=80' },
+    { id: 12, categoria: 'Combos', nombre: 'Combo Cóctel Camarón + Corona', descripcion: '1 Cóctel de Camarón + 1 Cerveza Corona', precio: 160.00, img: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=500&auto=format&fit=crop&q=80' },
+    { id: 13, categoria: 'Combos', nombre: 'Combo Aguachile Camarón + Corona', descripcion: '1 Aguachile de Camarón + 1 Cerveza Corona', precio: 100.00, img: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=500&auto=format&fit=crop&q=80' }
 ];
 
 const PROMO_SLIDES = [
-    'https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=600&q=80',
-    'https://images.unsplash.com/photo-1535399831218-d5bd36d1a6b3?auto=format&fit=crop&w=600&q=80',
-    'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=600&q=80'
+    'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=600&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1535399831218-d5bd36d1a6b3?w=600&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=600&auto=format&fit=crop&q=80'
 ];
 
 let currentPromoIdx = 0;
@@ -358,7 +364,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderMenu(menuData);
     cargarMeseros();
     cargarCuentaTransferencia();
-    iniciarSlideshow();
+    iniciarSlideshowPromos();
 });
 
 async function sincronizarMenu() {
@@ -373,14 +379,23 @@ async function sincronizarMenu() {
                         id: item.id,
                         categoria: item.categoria,
                         nombre: item.nombre,
-                        descripcion: item.descripcion || '',
+                        descripcion: item.descripcion || (matchDefault ? matchDefault.descripcion : ''),
                         precio: localP ? parseFloat(localP) : parseFloat(item.precio),
-                        img: matchDefault ? matchDefault.img : 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=400&q=80'
+                        img: (item.img && item.img.length > 5) ? item.img : (matchDefault ? matchDefault.img : 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=500&auto=format&fit=crop&q=80')
                     };
                 });
             }
         } catch(e){}
     }
+}
+
+function iniciarSlideshowPromos() {
+    const banner = document.getElementById('top-promo-banner');
+    if (!banner) return;
+    setInterval(() => {
+        currentPromoIdx = (currentPromoIdx + 1) % PROMO_SLIDES.length;
+        banner.style.backgroundImage = `url('${PROMO_SLIDES[currentPromoIdx]}')`;
+    }, 4000);
 }
 
 function cambiarFotoPromo(delta) {
@@ -435,15 +450,16 @@ function filtrarCat(cat, btn) {
 function renderMenu(items) {
     const grid = document.getElementById('menu-items');
     if (!grid) return;
+    const fallbackImg = 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=500&auto=format&fit=crop&q=80';
     grid.innerHTML = items.map(item => `
         <div class="menu-card" onclick="abrirModal(${item.id})">
-            <img src="${item.img}" class="menu-card-img" alt="${item.nombre}">
+            <img src="${item.img || fallbackImg}" class="menu-card-img" alt="${item.nombre}" onerror="this.src='${fallbackImg}'">
             <div class="menu-card-body">
                 <div>
                     <h3>${item.nombre}</h3>
                     <p style="font-size:0.75rem; color:#94a3b8; margin: 2px 0;">${item.descripcion || ''}</p>
                 </div>
-                <p class="price">$${item.precio.toFixed(2)}</p>
+                <p class="price">$${parseFloat(item.precio).toFixed(2)}</p>
             </div>
         </div>
     `).join('');
@@ -523,20 +539,6 @@ async function cargarCuentaTransferencia() {
     document.getElementById('info-transferencia').innerText = `Transferir a: ${cuenta}`;
 }
 
-async function iniciarSlideshow() {
-    const rawFondo = await getConfig('fondo_slideshow', '[]');
-    let imagenes = [];
-    try { imagenes = JSON.parse(rawFondo); } catch(e){}
-    if (!imagenes || imagenes.length === 0) return;
-    let idx = 0;
-    const bgDiv = document.getElementById('bg-slideshow');
-    bgDiv.style.backgroundImage = `url(${imagenes[0]})`;
-    setInterval(() => {
-        idx = (idx + 1) % imagenes.length;
-        bgDiv.style.backgroundImage = `url(${imagenes[idx]})`;
-    }, 5000);
-}
-
 async function enviarPedido() {
     const cliente = document.getElementById('nombre-cliente').value;
     const selectMesero = document.getElementById('select-mesero');
@@ -574,59 +576,6 @@ async function enviarPedido() {
     carrito = [];
     actualizarTotal();
     if (!esModoStaff) document.getElementById('nombre-cliente').value = '';
-}
-
-function abrirCancelacionAdmin() {
-    document.getElementById('input-cancel-pass').value = '';
-    document.getElementById('lista-cancel-pedidos').classList.add('hidden');
-    document.getElementById('modal-cancel-admin').classList.remove('hidden');
-}
-
-function cerrarModalCancel() {
-    document.getElementById('modal-cancel-admin').classList.add('hidden');
-}
-
-async function verificarPassCancel() {
-    const passInput = document.getElementById('input-cancel-pass').value.trim();
-    const adminPass = await getConfig('admin_password', 'ROXANA');
-
-    if (passInput === adminPass || passInput === 'ROXANA') {
-        renderListaCancel();
-    } else {
-        alert('Contraseña de administración incorrecta.');
-    }
-}
-
-async function renderListaCancel() {
-    const div = document.getElementById('lista-cancel-pedidos');
-    div.classList.remove('hidden');
-
-    const todos = await obtenerPedidosSync();
-    const activos = todos.filter(p => p.estado !== 'cobrado' && p.estado !== 'cancelado');
-
-    if (activos.length === 0) {
-        div.innerHTML = '<p style="font-size:0.85rem; color:#94a3b8;">No hay comandas activas para cancelar.</p>';
-        return;
-    }
-
-    div.innerHTML = `
-        <h4 style="margin:10px 0 5px 0;">Seleccione comanda a cancelar:</h4>
-        ${activos.map(p => `
-            <div style="background:#0f172a; padding:8px; border-radius:6px; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center;">
-                <div>
-                    <b>#${p.id} - ${p.cliente_mesa}</b> ($${p.total.toFixed(2)})<br>
-                    <small style="color:#94a3b8;">Atiende: ${p.mesero_nombre} \vert{}${p.origen}</small>
-                </div>
-                <button class="btn btn-danger" style="width:auto; padding:4px 8px;" onclick="ejecutarCancelacion(${p.id})">Cancelar</button>
-            </div>
-        `).join('')}
-    `;
-}
-
-async function ejecutarCancelacion(id) {
-    await actualizarEstadoPedidoSync(id, 'cancelado');
-    alert(`Comanda #${id} cancelada por administración.`);
-    renderListaCancel();
 }
 '''
 
@@ -943,7 +892,6 @@ function abrirModalHistorial() {
     showModalGen('📅 Historial de Días', '<p>Sincronizado con base de datos en nube.</p>');
 }
 
-/* Módulo de Modificación de Precios */
 async function abrirModalPrecios() {
     let html = '<div style="display:flex; flex-direction:column; gap:8px;">';
     
@@ -1114,7 +1062,6 @@ staff_html = '''<!DOCTYPE html>
     </header>
 
     <div class="admin-grid" style="max-width:500px; margin:20px auto; padding:15px;">
-        <!-- Modo Normal con Meseros -->
         <div id="staff-form-card" class="admin-card">
             <h3>Identificación de Mesero</h3>
             <select id="staff-select-mesero"><option value="">Selecciona tu Nombre...</option></select>
@@ -1123,7 +1070,6 @@ staff_html = '''<!DOCTYPE html>
             <button class="btn btn-success" onclick="ingresarMenuStaff()" style="margin-top:12px;">Ingresar al Menú de Mesero</button>
         </div>
 
-        <!-- Modo Directo cuando 'Sin Meseros' está activo -->
         <div id="staff-direct-card" class="admin-card hidden">
             <h3 style="color:var(--accent);">⚡ Comandero Directo (Sin Meseros)</h3>
             <p style="font-size:0.85rem; color:#94a3b8; margin:0 0 10px 0;">Modo rápido activo. Ingrese únicamente la mesa o cliente:</p>
@@ -1132,7 +1078,7 @@ staff_html = '''<!DOCTYPE html>
         </div>
 
         <div id="staff-orders-section" class="admin-card">
-            <h3>Comandas de Mis Mesas</h3>
+            <h3>Comandas de Mis Mesas / Cancelaciones</h3>
             <div id="staff-pedidos-list"></div>
         </div>
     </div>
@@ -1186,27 +1132,27 @@ function ingresarMenuDirecto() {
 async function cargarPedidosStaffGral() {
     const list = document.getElementById('staff-pedidos-list');
     const todos = await obtenerPedidosSync();
-    const staffPedidos = todos.filter(p => p.origen === 'Staff' && p.estado !== 'cobrado' && p.estado !== 'cancelado');
+    const staffPedidos = todos.filter(p => p.estado !== 'cobrado' && p.estado !== 'cancelado');
 
     if (staffPedidos.length === 0) {
-        list.innerHTML = '<p style="color:#94a3b8; font-size:0.85rem;">Sin comandas activas de staff.</p>';
+        list.innerHTML = '<p style="color:#94a3b8; font-size:0.85rem;">Sin comandas activas.</p>';
         return;
     }
 
     list.innerHTML = staffPedidos.map(p => `
-        <div style="background:#0f172a; padding:10px; margin-bottom:8px; border-radius:6px;">
+        <div style="background:#0f172a; padding:10px; margin-bottom:8px; border-radius:6px; border:1px solid #334155;">
             <b>#${p.id} - ${p.cliente_mesa}</b> | Total: $${p.total.toFixed(2)} | Atiende: <b>${p.mesero_nombre}</b><br>
-            <button class="btn btn-danger" style="margin-top:5px; padding:4px;" onclick="cancelarStaff(${p.id})">Cancelar Pedido</button>
+            <button class="btn btn-danger" style="margin-top:6px; padding:6px;" onclick="cancelarStaff(${p.id})">❌ Cancelar Pedido / Comanda</button>
         </div>
     `).join('');
 }
 
 async function cancelarStaff(id) {
     const adminPass = await getConfig('admin_password', 'ROXANA');
-    const p = prompt('Ingrese contraseña de ADMINISTRACIÓN (ROXANA) para cancelar este pedido:');
+    const p = prompt('Ingrese contraseña de ADMINISTRACIÓN (ROXANA) para cancelar esta comanda:');
     if (p === adminPass || p === 'ROXANA') {
         await actualizarEstadoPedidoSync(id, 'cancelado');
-        alert('Pedido cancelado.');
+        alert('Comanda cancelada correctamente.');
         cargarPedidosStaffGral();
     } else alert('Contraseña de administración incorrecta.');
 }
@@ -1305,4 +1251,4 @@ with open('js/admin.js', 'w') as f: f.write(admin_js)
 with open('js/staff.js', 'w') as f: f.write(staff_js)
 with open('js/cocina.js', 'w') as f: f.write(cocina_js)
 
-print("ACTUALIZACION_COMPLETA_EXITOSA")
+print("ACTUALIZACION_IMAGENES_Y_BOTONES_EXITOSA")

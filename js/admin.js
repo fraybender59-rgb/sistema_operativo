@@ -212,7 +212,6 @@ function abrirModalHistorial() {
     showModalGen('📅 Historial de Días', '<p>Sincronizado con base de datos en nube.</p>');
 }
 
-/* Módulo de Modificación de Precios */
 async function abrirModalPrecios() {
     let html = '<div style="display:flex; flex-direction:column; gap:8px;">';
     

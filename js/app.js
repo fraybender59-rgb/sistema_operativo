@@ -1,23 +1,23 @@
 const MENU_DEFAULT = [
-    { id: 1, categoria: 'Cócteles', nombre: 'Cóctel de Camarón Grande', descripcion: 'Cóctel grande preparado con camarón fresco', precio: 150.00, img: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=400&q=80' },
-    { id: 2, categoria: 'Cócteles', nombre: 'Cóctel camaron chico', descripcion: 'Cóctel chico de camarón fresco', precio: 120.00, img: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=400&q=80' },
-    { id: 3, categoria: 'Céviches', nombre: 'Ceviche de Camarón grande', descripcion: 'Ceviche fresco de camarón picado', precio: 140.00, img: 'https://images.unsplash.com/photo-1535399831218-d5bd36d1a6b3?auto=format&fit=crop&w=400&q=80' },
-    { id: 4, categoria: 'Céviches', nombre: 'Ceviche de Camarones chico', descripcion: 'Porción chica de ceviche de camarón', precio: 110.00, img: 'https://images.unsplash.com/photo-1535399831218-d5bd36d1a6b3?auto=format&fit=crop&w=400&q=80' },
-    { id: 5, categoria: 'Céviches', nombre: 'Ceviche de pescado grande', descripcion: 'Ceviche tradicional de pescado fresco', precio: 130.00, img: 'https://images.unsplash.com/photo-1535399831218-d5bd36d1a6b3?auto=format&fit=crop&w=400&q=80' },
-    { id: 6, categoria: 'Céviches', nombre: 'Ceviche de pescado chic', descripcion: 'Porción chica de ceviche de pescado', precio: 130.00, img: 'https://images.unsplash.com/photo-1535399831218-d5bd36d1a6b3?auto=format&fit=crop&w=400&q=80' },
-    { id: 7, categoria: 'Aguachiles', nombre: 'Aguachile de Camarón', descripcion: 'Camarones curtidos en limón y chile', precio: 80.00, img: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=400&q=80' },
-    { id: 8, categoria: 'Aguachiles', nombre: 'Aguachile de Pescado', descripcion: 'Pescado fresco curtido en limón', precio: 70.00, img: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=400&q=80' },
-    { id: 9, categoria: 'Tacos', nombre: 'orden tacos gobernador (4 tacos)', descripcion: '4 tacos gobernador con camarón y queso', precio: 220.00, img: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=400&q=80' },
-    { id: 10, categoria: 'Tacos', nombre: 'Orden tacos estilo baja (4 tacos)', descripcion: '4 tacos de pescado capeado estilo Baja', precio: 200.00, img: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=400&q=80' },
-    { id: 11, categoria: 'Combos', nombre: 'Combo Tacos Gobernador + Corona', descripcion: '4 Tacos Gobernador + 1 Cerveza Corona', precio: 220.00, img: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=400&q=80' },
-    { id: 12, categoria: 'Combos', nombre: 'Combo Cóctel Camarón + Corona', descripcion: '1 Cóctel de Camarón + 1 Cerveza Corona', precio: 160.00, img: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=400&q=80' },
-    { id: 13, categoria: 'Combos', nombre: 'Combo Aguachile Camarón + Corona', descripcion: '1 Aguachile de Camarón + 1 Cerveza Corona', precio: 100.00, img: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=400&q=80' }
+    { id: 1, categoria: 'Cócteles', nombre: 'Cóctel de Camarón Grande', descripcion: 'Cóctel grande preparado con camarón fresco', precio: 150.00, img: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=500&auto=format&fit=crop&q=80' },
+    { id: 2, categoria: 'Cócteles', nombre: 'Cóctel camaron chico', descripcion: 'Cóctel chico de camarón fresco', precio: 120.00, img: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=500&auto=format&fit=crop&q=80' },
+    { id: 3, categoria: 'Céviches', nombre: 'Ceviche de Camarón grande', descripcion: 'Ceviche fresco de camarón picado', precio: 140.00, img: 'https://images.unsplash.com/photo-1535399831218-d5bd36d1a6b3?w=500&auto=format&fit=crop&q=80' },
+    { id: 4, categoria: 'Céviches', nombre: 'Ceviche de Camarones chico', descripcion: 'Porción chica de ceviche de camarón', precio: 110.00, img: 'https://images.unsplash.com/photo-1535399831218-d5bd36d1a6b3?w=500&auto=format&fit=crop&q=80' },
+    { id: 5, categoria: 'Céviches', nombre: 'Ceviche de pescado grande', descripcion: 'Ceviche tradicional de pescado fresco', precio: 130.00, img: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=500&auto=format&fit=crop&q=80' },
+    { id: 6, categoria: 'Céviches', nombre: 'Ceviche de pescado chic', descripcion: 'Porción chica de ceviche de pescado', precio: 130.00, img: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=500&auto=format&fit=crop&q=80' },
+    { id: 7, categoria: 'Aguachiles', nombre: 'Aguachile de Camarón', descripcion: 'Camarones curtidos en limón y chile', precio: 80.00, img: 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=500&auto=format&fit=crop&q=80' },
+    { id: 8, categoria: 'Aguachiles', nombre: 'Aguachile de Pescado', descripcion: 'Pescado fresco curtido en limón', precio: 70.00, img: 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=500&auto=format&fit=crop&q=80' },
+    { id: 9, categoria: 'Tacos', nombre: 'orden tacos gobernador (4 tacos)', descripcion: '4 tacos gobernador con camarón y queso', precio: 220.00, img: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=500&auto=format&fit=crop&q=80' },
+    { id: 10, categoria: 'Tacos', nombre: 'Orden tacos estilo baja (4 tacos)', descripcion: '4 tacos de pescado capeado estilo Baja', precio: 200.00, img: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=500&auto=format&fit=crop&q=80' },
+    { id: 11, categoria: 'Combos', nombre: 'Combo Tacos Gobernador + Corona', descripcion: '4 Tacos Gobernador + 1 Cerveza Corona', precio: 220.00, img: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=500&auto=format&fit=crop&q=80' },
+    { id: 12, categoria: 'Combos', nombre: 'Combo Cóctel Camarón + Corona', descripcion: '1 Cóctel de Camarón + 1 Cerveza Corona', precio: 160.00, img: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=500&auto=format&fit=crop&q=80' },
+    { id: 13, categoria: 'Combos', nombre: 'Combo Aguachile Camarón + Corona', descripcion: '1 Aguachile de Camarón + 1 Cerveza Corona', precio: 100.00, img: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=500&auto=format&fit=crop&q=80' }
 ];
 
 const PROMO_SLIDES = [
-    'https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=600&q=80',
-    'https://images.unsplash.com/photo-1535399831218-d5bd36d1a6b3?auto=format&fit=crop&w=600&q=80',
-    'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=600&q=80'
+    'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=600&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1535399831218-d5bd36d1a6b3?w=600&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=600&auto=format&fit=crop&q=80'
 ];
 
 let currentPromoIdx = 0;
@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderMenu(menuData);
     cargarMeseros();
     cargarCuentaTransferencia();
-    iniciarSlideshow();
+    iniciarSlideshowPromos();
 });
 
 async function sincronizarMenu() {
@@ -50,14 +50,23 @@ async function sincronizarMenu() {
                         id: item.id,
                         categoria: item.categoria,
                         nombre: item.nombre,
-                        descripcion: item.descripcion || '',
+                        descripcion: item.descripcion || (matchDefault ? matchDefault.descripcion : ''),
                         precio: localP ? parseFloat(localP) : parseFloat(item.precio),
-                        img: matchDefault ? matchDefault.img : 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=400&q=80'
+                        img: (item.img && item.img.length > 5) ? item.img : (matchDefault ? matchDefault.img : 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=500&auto=format&fit=crop&q=80')
                     };
                 });
             }
         } catch(e){}
     }
+}
+
+function iniciarSlideshowPromos() {
+    const banner = document.getElementById('top-promo-banner');
+    if (!banner) return;
+    setInterval(() => {
+        currentPromoIdx = (currentPromoIdx + 1) % PROMO_SLIDES.length;
+        banner.style.backgroundImage = `url('${PROMO_SLIDES[currentPromoIdx]}')`;
+    }, 4000);
 }
 
 function cambiarFotoPromo(delta) {
@@ -112,15 +121,16 @@ function filtrarCat(cat, btn) {
 function renderMenu(items) {
     const grid = document.getElementById('menu-items');
     if (!grid) return;
+    const fallbackImg = 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=500&auto=format&fit=crop&q=80';
     grid.innerHTML = items.map(item => `
         <div class="menu-card" onclick="abrirModal(${item.id})">
-            <img src="${item.img}" class="menu-card-img" alt="${item.nombre}">
+            <img src="${item.img || fallbackImg}" class="menu-card-img" alt="${item.nombre}" onerror="this.src='${fallbackImg}'">
             <div class="menu-card-body">
                 <div>
                     <h3>${item.nombre}</h3>
                     <p style="font-size:0.75rem; color:#94a3b8; margin: 2px 0;">${item.descripcion || ''}</p>
                 </div>
-                <p class="price">$${item.precio.toFixed(2)}</p>
+                <p class="price">$${parseFloat(item.precio).toFixed(2)}</p>
             </div>
         </div>
     `).join('');
@@ -200,20 +210,6 @@ async function cargarCuentaTransferencia() {
     document.getElementById('info-transferencia').innerText = `Transferir a: ${cuenta}`;
 }
 
-async function iniciarSlideshow() {
-    const rawFondo = await getConfig('fondo_slideshow', '[]');
-    let imagenes = [];
-    try { imagenes = JSON.parse(rawFondo); } catch(e){}
-    if (!imagenes || imagenes.length === 0) return;
-    let idx = 0;
-    const bgDiv = document.getElementById('bg-slideshow');
-    bgDiv.style.backgroundImage = `url(${imagenes[0]})`;
-    setInterval(() => {
-        idx = (idx + 1) % imagenes.length;
-        bgDiv.style.backgroundImage = `url(${imagenes[idx]})`;
-    }, 5000);
-}
-
 async function enviarPedido() {
     const cliente = document.getElementById('nombre-cliente').value;
     const selectMesero = document.getElementById('select-mesero');
@@ -260,57 +256,4 @@ async function enviarPedido() {
     carrito = [];
     actualizarTotal();
     if (!esModoStaff) document.getElementById('nombre-cliente').value = '';
-}
-
-function abrirCancelacionAdmin() {
-    document.getElementById('input-cancel-pass').value = '';
-    document.getElementById('lista-cancel-pedidos').classList.add('hidden');
-    document.getElementById('modal-cancel-admin').classList.remove('hidden');
-}
-
-function cerrarModalCancel() {
-    document.getElementById('modal-cancel-admin').classList.add('hidden');
-}
-
-async function verificarPassCancel() {
-    const passInput = document.getElementById('input-cancel-pass').value.trim();
-    const adminPass = await getConfig('admin_password', 'ROXANA');
-
-    if (passInput === adminPass || passInput === 'ROXANA') {
-        renderListaCancel();
-    } else {
-        alert('Contraseña de administración incorrecta.');
-    }
-}
-
-async function renderListaCancel() {
-    const div = document.getElementById('lista-cancel-pedidos');
-    div.classList.remove('hidden');
-
-    const todos = await obtenerPedidosSync();
-    const activos = todos.filter(p => p.estado !== 'cobrado' && p.estado !== 'cancelado');
-
-    if (activos.length === 0) {
-        div.innerHTML = '<p style="font-size:0.85rem; color:#94a3b8;">No hay comandas activas para cancelar.</p>';
-        return;
-    }
-
-    div.innerHTML = `
-        <h4 style="margin:10px 0 5px 0;">Seleccione comanda a cancelar:</h4>
-        ${activos.map(p => `
-            <div style="background:#0f172a; padding:8px; border-radius:6px; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center;">
-                <div>
-                    <b>#${p.id} - ${p.cliente_mesa}</b> ($${p.total.toFixed(2)})<br>
-                    <small style="color:#94a3b8;">Atiende: ${p.mesero_nombre} ert{}${p.origen}</small>
-                </div>
-                <button class="btn btn-danger" style="width:auto; padding:4px 8px;" onclick="ejecutarCancelacion(${p.id})">Cancelar</button>
-            </div>
-        `).join('')}
-    `;
-}
-
-async function ejecutarCancelacion(id) {
-    await actualizarEstadoPedidoSync(id, 'cancelado');
-    alert(`Comanda #${id} cancelada por administración.`);
-    renderListaCancel();
 }
