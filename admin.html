@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caja Maestro - Administración</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div id="admin-login-modal" class="modal">
+        <div class="modal-content">
+            <h3>🔒 Acceso Restringido</h3>
+            <input type="password" id="admin-pass-input" placeholder="Contraseña Admin">
+            <button class="btn btn-success" onclick="loginAdmin()">Ingresar</button>
+        </div>
+    </div>
+
+    <div id="admin-panel" class="admin-grid hidden">
+        <header style="background:none; border:none; padding:10px 0;">
+            <h1>⚙️ Caja Maestro - Administración</h1>
+        </header>
+
+        <!-- Botones Principales -->
+        <div class="admin-top-grid">
+            <a href="index.html" target="_blank" class="btn-nav-admin bg-publico">📱 Comandero Público</a>
+            <a href="staff.html" target="_blank" class="btn-nav-admin bg-staff">📝 Comandero Staff</a>
+            <button onclick="alert('Módulo de Almacén desactivado')" class="btn-nav-admin bg-almacen">📦 Almacén</button>
+            <a href="cocina.html" target="_blank" class="btn-nav-admin bg-cocina">🧑‍🍳 Cocina</a>
+            <button onclick="abrirModalCorte()" class="btn-nav-admin bg-corte">💰 Corte</button>
+            <button onclick="abrirModalCobradas()" class="btn-nav-admin bg-cobradas">📁 Cobradas Hoy</button>
+            <button onclick="abrirModalHistorial()" class="btn-nav-admin bg-historial">📅 Historial de Días</button>
+            <button onclick="abrirModalComprobantes()" class="btn-nav-admin bg-comprobantes">📸 Ver Comprobantes</button>
+            <button onclick="abrirModalPrecios()" class="btn-nav-admin bg-precios">✏️ Precios</button>
+            <button onclick="abrirModalTarjeta()" class="btn-nav-admin bg-tarjeta">💳 Config Tarjeta</button>
+        </div>
+
+        <!-- Caja Principal -->
+        <div class="admin-card">
+            <h3>📝 Caja Principal</h3>
+            <div class="tab-container">
+                <button class="tab-btn active" id="tab-cli" onclick="cambiarTabCaja('Clientes')">👤 Clientes</button>
+                <button class="tab-btn" id="tab-sta" onclick="cambiarTabCaja('Staff')">🧑‍🍳 Staff</button>
+            </div>
+            <div id="lista-caja-abierta"></div>
+        </div>
+
+        <!-- Ajustes del Sistema -->
+        <div class="admin-card">
+            <h3>⚙️ Ajustes del Sistema</h3>
+            <button class="btn btn-warning" onclick="cambiarPassAdmin()">Cambiar Contraseña Admin</button><br><br>
+            <button class="btn" onclick="cambiarWhatsApp()">Cambiar WhatsApp Recepción</button><br><br>
+            <button class="btn btn-success" onclick="cambiarCuentaBancaria()">Cambiar Número de Cuenta Bancaria</button>
+        </div>
+
+        <!-- Fondo Slideshow -->
+        <div class="admin-card">
+            <h3>🖼️ Fondo de Clientes (Carrusel)</h3>
+            <input type="file" id="slideshow-input" accept="image/*" onchange="subirImagenFondo(event)">
+            <div id="slideshow-preview" style="display:flex; gap:8px; overflow-x:auto; margin-top:10px;"></div>
+        </div>
+
+        <!-- Gestión Meseros -->
+        <div class="admin-card">
+            <h3>👥 Gestión de Meseros (Max 10)</h3>
+            <button id="btn-toggle-sin-meseros" class="btn btn-warning" style="margin-bottom:10px;" onclick="toggleModoSinMeseros()">🚫 Activar Modo Sin Meseros</button>
+            <input type="text" id="mesero-nombre" placeholder="Nombre Mesero">
+            <input type="password" id="mesero-pass" placeholder="Contraseña Mesero" style="margin-top:6px;">
+            <input type="text" id="mesero-mesa" placeholder="Mesas Asignadas (Ej. Mesa 1)" style="margin-top:6px;">
+            <button class="btn btn-success" onclick="agregarMesero()" style="margin-top:8px;">Agregar Mesero</button>
+            <ul id="lista-meseros" style="list-style:none; padding:0; margin-top:10px;"></ul>
+        </div>
+    </div>
+
+    <!-- Modal Adjuntar Comprobante -->
+    <div id="modal-subir-comprobante" class="modal hidden">
+        <div class="modal-content">
+            <h3>📸 Adjuntar Comprobante de Pago</h3>
+            <p style="font-size:0.85rem; color:#94a3b8; margin:0;">Seleccione o tome la foto de la transferencia:</p>
+            <input type="file" id="file-comprobante" accept="image/*">
+            <button class="btn btn-success" onclick="confirmarCobroTransferencia()">Confirmar y Cobrar</button>
+            <button class="btn btn-danger" onclick="cerrarModalComprobante()">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- Modal Genérico -->
+    <div id="modal-generic" class="modal hidden">
+        <div class="modal-content">
+            <h3 id="modal-gen-title">Modal</h3>
+            <div id="modal-gen-body"></div>
+            <button class="btn btn-danger" onclick="cerrarModalGeneric()">Cerrar</button>
+        </div>
+    </div>
+
+    <script src="js/supabase_config.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>

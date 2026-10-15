@@ -1,0 +1,316 @@
+const MENU_DEFAULT = [
+    { id: 1, categoria: 'Cócteles', nombre: 'Cóctel de Camarón Grande', descripcion: 'Cóctel grande preparado con camarón fresco', precio: 150.00, img: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=400&q=80' },
+    { id: 2, categoria: 'Cócteles', nombre: 'Cóctel camaron chico', descripcion: 'Cóctel chico de camarón fresco', precio: 120.00, img: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=400&q=80' },
+    { id: 3, categoria: 'Céviches', nombre: 'Ceviche de Camarón grande', descripcion: 'Ceviche fresco de camarón picado', precio: 140.00, img: 'https://images.unsplash.com/photo-1535399831218-d5bd36d1a6b3?auto=format&fit=crop&w=400&q=80' },
+    { id: 4, categoria: 'Céviches', nombre: 'Ceviche de Camarones chico', descripcion: 'Porción chica de ceviche de camarón', precio: 110.00, img: 'https://images.unsplash.com/photo-1535399831218-d5bd36d1a6b3?auto=format&fit=crop&w=400&q=80' },
+    { id: 5, categoria: 'Céviches', nombre: 'Ceviche de pescado grande', descripcion: 'Ceviche tradicional de pescado fresco', precio: 130.00, img: 'https://images.unsplash.com/photo-1535399831218-d5bd36d1a6b3?auto=format&fit=crop&w=400&q=80' },
+    { id: 6, categoria: 'Céviches', nombre: 'Ceviche de pescado chic', descripcion: 'Porción chica de ceviche de pescado', precio: 130.00, img: 'https://images.unsplash.com/photo-1535399831218-d5bd36d1a6b3?auto=format&fit=crop&w=400&q=80' },
+    { id: 7, categoria: 'Aguachiles', nombre: 'Aguachile de Camarón', descripcion: 'Camarones curtidos en limón y chile', precio: 80.00, img: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=400&q=80' },
+    { id: 8, categoria: 'Aguachiles', nombre: 'Aguachile de Pescado', descripcion: 'Pescado fresco curtido en limón', precio: 70.00, img: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=400&q=80' },
+    { id: 9, categoria: 'Tacos', nombre: 'orden tacos gobernador (4 tacos)', descripcion: '4 tacos gobernador con camarón y queso', precio: 220.00, img: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=400&q=80' },
+    { id: 10, categoria: 'Tacos', nombre: 'Orden tacos estilo baja (4 tacos)', descripcion: '4 tacos de pescado capeado estilo Baja', precio: 200.00, img: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=400&q=80' },
+    { id: 11, categoria: 'Combos', nombre: 'Combo Tacos Gobernador + Corona', descripcion: '4 Tacos Gobernador + 1 Cerveza Corona', precio: 220.00, img: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=400&q=80' },
+    { id: 12, categoria: 'Combos', nombre: 'Combo Cóctel Camarón + Corona', descripcion: '1 Cóctel de Camarón + 1 Cerveza Corona', precio: 160.00, img: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=400&q=80' },
+    { id: 13, categoria: 'Combos', nombre: 'Combo Aguachile Camarón + Corona', descripcion: '1 Aguachile de Camarón + 1 Cerveza Corona', precio: 100.00, img: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=400&q=80' }
+];
+
+const PROMO_SLIDES = [
+    'https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1535399831218-d5bd36d1a6b3?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=600&q=80'
+];
+
+let currentPromoIdx = 0;
+let menuData = [...MENU_DEFAULT];
+let carrito = [];
+let itemSeleccionado = null;
+let cantidadTemp = 1;
+let esModoStaff = false;
+
+document.addEventListener('DOMContentLoaded', async () => {
+    await sincronizarMenu();
+    await comprobarModoSinMeseros();
+    detectarModoStaff();
+    renderCategorias();
+    renderMenu(menuData);
+    cargarMeseros();
+    cargarCuentaTransferencia();
+    iniciarSlideshow();
+});
+
+async function sincronizarMenu() {
+    if (_supabase) {
+        try {
+            const { data } = await _supabase.from('menu').select('*');
+            if (data && data.length > 0) {
+                menuData = data.map(item => {
+                    const localP = localStorage.getItem(`precio_prod_${item.id}`);
+                    const matchDefault = MENU_DEFAULT.find(d => d.id === item.id);
+                    return {
+                        id: item.id,
+                        categoria: item.categoria,
+                        nombre: item.nombre,
+                        descripcion: item.descripcion || '',
+                        precio: localP ? parseFloat(localP) : parseFloat(item.precio),
+                        img: matchDefault ? matchDefault.img : 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=400&q=80'
+                    };
+                });
+            }
+        } catch(e){}
+    }
+}
+
+function cambiarFotoPromo(delta) {
+    currentPromoIdx = (currentPromoIdx + delta + PROMO_SLIDES.length) % PROMO_SLIDES.length;
+    document.getElementById('promo-slide-img').src = PROMO_SLIDES[currentPromoIdx];
+    document.getElementById('promo-num').innerText = `${currentPromoIdx + 1} / ${PROMO_SLIDES.length}`;
+}
+
+function cerrarPromoBienvenida() {
+    document.getElementById('modal-promo-bienvenida').classList.add('hidden');
+}
+
+async function comprobarModoSinMeseros() {
+    const sinMeseros = await getConfig('modo_sin_meseros', 'false');
+    if (sinMeseros === 'true') {
+        const divMesero = document.getElementById('div-select-mesero');
+        if (divMesero) divMesero.classList.add('hidden');
+    }
+}
+
+function detectarModoStaff() {
+    const params = new URLSearchParams(window.location.search);
+    const origen = params.get('origen');
+    const mesero = params.get('mesero');
+    const mesa = params.get('mesa');
+
+    if (origen === 'Staff') {
+        esModoStaff = true;
+        document.getElementById('staff-banner').classList.remove('hidden');
+        document.getElementById('staff-banner-info').innerText = `${mesero || 'Comandero Directo'} | Mesa: ${mesa || 'General'}`;
+        document.getElementById('bloque-pago-cliente').classList.add('hidden');
+        if (mesa) document.getElementById('nombre-cliente').value = mesa;
+    }
+}
+
+function renderCategorias() {
+    const categorias = ['Todas', ...new Set(menuData.map(i => i.categoria))];
+    const catContainer = document.getElementById('cat-container');
+    if (!catContainer) return;
+    catContainer.innerHTML = categorias.map((cat, idx) => `
+        <button class="cat-btn ${idx === 0 ? 'active' : ''}" onclick="filtrarCat('${cat}', this)">${cat}</button>
+    `).join('');
+}
+
+function filtrarCat(cat, btn) {
+    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    if (cat === 'Todas') renderMenu(menuData);
+    else renderMenu(menuData.filter(i => i.categoria === cat));
+}
+
+function renderMenu(items) {
+    const grid = document.getElementById('menu-items');
+    if (!grid) return;
+    grid.innerHTML = items.map(item => `
+        <div class="menu-card" onclick="abrirModal(${item.id})">
+            <img src="${item.img}" class="menu-card-img" alt="${item.nombre}">
+            <div class="menu-card-body">
+                <div>
+                    <h3>${item.nombre}</h3>
+                    <p style="font-size:0.75rem; color:#94a3b8; margin: 2px 0;">${item.descripcion || ''}</p>
+                </div>
+                <p class="price">$${item.precio.toFixed(2)}</p>
+            </div>
+        </div>
+    `).join('');
+}
+
+function abrirModal(id) {
+    itemSeleccionado = menuData.find(i => i.id === id);
+    if (!itemSeleccionado) return;
+    cantidadTemp = 1;
+    document.getElementById('modal-title').innerText = itemSeleccionado.nombre;
+    document.getElementById('modal-desc').innerText = itemSeleccionado.descripcion || '';
+    document.getElementById('modal-qty').innerText = 1;
+    document.getElementById('modal-comment').value = '';
+    document.getElementById('modal-item').classList.remove('hidden');
+}
+
+function cambiarCantidad(delta) {
+    if (cantidadTemp + delta >= 1) {
+        cantidadTemp += delta;
+        document.getElementById('modal-qty').innerText = cantidadTemp;
+    }
+}
+
+function cerrarModal() {
+    document.getElementById('modal-item').classList.add('hidden');
+}
+
+function agregarAlCarritoDesdeModal() {
+    const comentario = document.getElementById('modal-comment').value;
+    carrito.push({
+        nombre: itemSeleccionado.nombre,
+        precio: parseFloat(itemSeleccionado.precio),
+        cantidad: cantidadTemp,
+        comentario
+    });
+    actualizarTotal();
+    cerrarModal();
+}
+
+function actualizarTotal() {
+    const total = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
+    document.getElementById('total-price').innerText = total.toFixed(2);
+}
+
+function togglePago(val) {
+    const divInfo = document.getElementById('info-transferencia');
+    if (val.includes('Transferencia')) divInfo.classList.remove('hidden');
+    else divInfo.classList.add('hidden');
+}
+
+async function cargarMeseros() {
+    const select = document.getElementById('select-mesero');
+    select.innerHTML = '<option value="">Selecciona Mesero...</option>';
+    
+    const params = new URLSearchParams(window.location.search);
+    const meseroStaff = params.get('mesero');
+
+    if (meseroStaff) {
+        select.innerHTML = `<option value="${meseroStaff}" selected>${meseroStaff}</option>`;
+        return;
+    }
+
+    if (_supabase) {
+        try {
+            const { data } = await _supabase.from('meseros').select('*');
+            if (data && data.length > 0) {
+                data.forEach(m => select.innerHTML += `<option value="${m.nombre}">${m.nombre}</option>`);
+                return;
+            }
+        } catch(e){}
+    }
+    select.innerHTML += '<option value="Luis">Luis</option><option value="Ana">Ana</option>';
+}
+
+async function cargarCuentaTransferencia() {
+    const cuenta = await getConfig('cuenta_transferencia', '1234 5678 9012 3456 (BBVA)');
+    document.getElementById('info-transferencia').innerText = `Transferir a: ${cuenta}`;
+}
+
+async function iniciarSlideshow() {
+    const rawFondo = await getConfig('fondo_slideshow', '[]');
+    let imagenes = [];
+    try { imagenes = JSON.parse(rawFondo); } catch(e){}
+    if (!imagenes || imagenes.length === 0) return;
+    let idx = 0;
+    const bgDiv = document.getElementById('bg-slideshow');
+    bgDiv.style.backgroundImage = `url(${imagenes[0]})`;
+    setInterval(() => {
+        idx = (idx + 1) % imagenes.length;
+        bgDiv.style.backgroundImage = `url(${imagenes[idx]})`;
+    }, 5000);
+}
+
+async function enviarPedido() {
+    const cliente = document.getElementById('nombre-cliente').value;
+    const selectMesero = document.getElementById('select-mesero');
+    const mesero_nombre = selectMesero ? (selectMesero.value || 'Cliente / Directo') : 'Cliente / Directo';
+    const metodo_pago = esModoStaff ? 'Pendiente en Caja' : document.getElementById('metodo-pago').value;
+
+    if (!cliente || carrito.length === 0) return alert('Ingresa Nombre/Mesa y agrega platillos al pedido.');
+
+    const total = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
+
+    const nuevoPedido = {
+        id: Date.now(),
+        cliente_mesa: cliente,
+        mesero_nombre: mesero_nombre,
+        total: total,
+        estado: 'pendiente',
+        metodo_pago: metodo_pago,
+        origen: esModoStaff ? 'Staff' : 'Clientes',
+        creado_en: new Date().toISOString(),
+        detalles: [...carrito]
+    };
+
+    await guardarPedidoSync(nuevoPedido);
+
+    alert('¡Pedido enviado a Cocina exitosamente!');
+
+    if (!esModoStaff) {
+        const waNum = await getConfig('whatsapp_num', '5554746310');
+        let msg = `🌊 *NUEVO PEDIDO - MAR Y SAZÓN*
+
+📌 *Cliente/Mesa:* ${cliente}
+👨‍🍳 *Atiende:* ${mesero_nombre}
+💳 *Pago:* ${metodo_pago}
+
+*Detalles:*
+`;
+        carrito.forEach(c => { msg += `- ${c.cantidad}x ${c.nombre} ($${(c.precio * c.cantidad).toFixed(2)}) ${c.comentario ? '['+c.comentario+']' : ''}
+`; });
+        msg += `
+💰 *Total:* $${total.toFixed(2)}`;
+        if (waNum) window.open(`https://wa.me/52${waNum}?text=${encodeURIComponent(msg)}`, '_blank');
+    }
+
+    carrito = [];
+    actualizarTotal();
+    if (!esModoStaff) document.getElementById('nombre-cliente').value = '';
+}
+
+function abrirCancelacionAdmin() {
+    document.getElementById('input-cancel-pass').value = '';
+    document.getElementById('lista-cancel-pedidos').classList.add('hidden');
+    document.getElementById('modal-cancel-admin').classList.remove('hidden');
+}
+
+function cerrarModalCancel() {
+    document.getElementById('modal-cancel-admin').classList.add('hidden');
+}
+
+async function verificarPassCancel() {
+    const passInput = document.getElementById('input-cancel-pass').value.trim();
+    const adminPass = await getConfig('admin_password', 'ROXANA');
+
+    if (passInput === adminPass || passInput === 'ROXANA') {
+        renderListaCancel();
+    } else {
+        alert('Contraseña de administración incorrecta.');
+    }
+}
+
+async function renderListaCancel() {
+    const div = document.getElementById('lista-cancel-pedidos');
+    div.classList.remove('hidden');
+
+    const todos = await obtenerPedidosSync();
+    const activos = todos.filter(p => p.estado !== 'cobrado' && p.estado !== 'cancelado');
+
+    if (activos.length === 0) {
+        div.innerHTML = '<p style="font-size:0.85rem; color:#94a3b8;">No hay comandas activas para cancelar.</p>';
+        return;
+    }
+
+    div.innerHTML = `
+        <h4 style="margin:10px 0 5px 0;">Seleccione comanda a cancelar:</h4>
+        ${activos.map(p => `
+            <div style="background:#0f172a; padding:8px; border-radius:6px; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <b>#${p.id} - ${p.cliente_mesa}</b> ($${p.total.toFixed(2)})<br>
+                    <small style="color:#94a3b8;">Atiende: ${p.mesero_nombre} ert{}${p.origen}</small>
+                </div>
+                <button class="btn btn-danger" style="width:auto; padding:4px 8px;" onclick="ejecutarCancelacion(${p.id})">Cancelar</button>
+            </div>
+        `).join('')}
+    `;
+}
+
+async function ejecutarCancelacion(id) {
+    await actualizarEstadoPedidoSync(id, 'cancelado');
+    alert(`Comanda #${id} cancelada por administración.`);
+    renderListaCancel();
+}

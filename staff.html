@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Punto Staff - Mar y Sazón</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <header>
+        <h1>👨‍🍳 Punto Staff - Meseros</h1>
+    </header>
+
+    <div class="admin-grid" style="max-width:500px; margin:20px auto; padding:15px;">
+        <!-- Modo Normal con Meseros -->
+        <div id="staff-form-card" class="admin-card">
+            <h3>Identificación de Mesero</h3>
+            <select id="staff-select-mesero"><option value="">Selecciona tu Nombre...</option></select>
+            <input type="password" id="staff-pass" placeholder="Contraseña Mesero" style="margin-top:8px;">
+            <input type="text" id="staff-cliente" placeholder="Mesa / Nombre del Cliente" style="margin-top:8px;">
+            <button class="btn btn-success" onclick="ingresarMenuStaff()" style="margin-top:12px;">Ingresar al Menú de Mesero</button>
+        </div>
+
+        <!-- Modo Directo cuando 'Sin Meseros' está activo -->
+        <div id="staff-direct-card" class="admin-card hidden">
+            <h3 style="color:var(--accent);">⚡ Comandero Directo (Sin Meseros)</h3>
+            <p style="font-size:0.85rem; color:#94a3b8; margin:0 0 10px 0;">Modo rápido activo. Ingrese únicamente la mesa o cliente:</p>
+            <input type="text" id="staff-direct-cliente" placeholder="Mesa / Nombre del Cliente">
+            <button class="btn btn-success" onclick="ingresarMenuDirecto()" style="margin-top:12px;">🚀 Tomar Pedido Ahora</button>
+        </div>
+
+        <div id="staff-orders-section" class="admin-card">
+            <h3>Comandas de Mis Mesas</h3>
+            <div id="staff-pedidos-list"></div>
+        </div>
+    </div>
+
+    <script src="js/supabase_config.js"></script>
+    <script src="js/staff.js"></script>
+</body>
+</html>
