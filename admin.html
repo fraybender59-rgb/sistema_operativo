@@ -8,78 +8,91 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-    <div id="login-modal" class="modal" style="display:flex;">
-        <div class="modal-content" style="text-align:center;">
+    <div id="admin-login-modal" class="modal">
+        <div class="modal-content">
             <h3>🔒 Acceso Restringido</h3>
-            <p style="color:#aaa; font-size:0.85rem; margin:10px 0;">Ingresa la clave de administrador</p>
-            <input type="password" id="pass-admin" placeholder="Clave..." style="text-align:center; padding:10px; width:100%; margin-bottom:12px; background:#0d141c; border:1px solid #2c3e50; color:white; border-radius:6px;">
-            <button onclick="verificarClaveDirecta()" style="width:100%; padding:10px; background:#ff9800; border:none; font-weight:bold; border-radius:6px; cursor:pointer;">Ingresar</button>
+            <input type="password" id="admin-pass-input" placeholder="Contraseña Admin">
+            <button class="btn btn-success" onclick="loginAdmin()">Ingresar</button>
         </div>
     </div>
 
-    <div id="admin-content" class="hidden">
-        <div class="header-title">⚙️ Caja Maestro - Administración</div>
+    <div id="admin-panel" class="admin-grid hidden">
+        <header style="background:none; border:none; padding:10px 0;">
+            <h1>⚙️ Caja Maestro - Administración</h1>
+        </header>
 
-        <div class="admin-buttons-grid">
-            <a href="index.html" class="btn-nav-grid bg-publico">📱 Comandero Público</a>
-            <a href="staff.html" class="btn-nav-grid bg-staff">📝 Comandero Staff</a>
-            <a href="almacen.html" class="btn-nav-grid bg-almacen">📦 Almacén</a>
-            <a href="#" class="btn-nav-grid bg-cocina">🧑‍🍳 Cocina</a>
-            <button class="btn-nav-grid bg-corte">💰 Corte</button>
-            <button class="btn-nav-grid bg-cobradas">📁 Cobradas Hoy</button>
-            <button class="btn-nav-grid bg-historial">📅 Historial de Días</button>
-            <button class="btn-nav-grid bg-comprobantes">📸 Ver Comprobantes</button>
-            <button class="btn-nav-grid bg-precios">✏️ Precios</button>
-            <button class="btn-nav-grid bg-tarjeta">💳 Config Tarjeta</button>
+        <!-- Botones Principales -->
+        <div class="admin-top-grid">
+            <a href="index.html" target="_blank" class="btn-nav-admin bg-publico">📱 Comandero Público</a>
+            <a href="staff.html" target="_blank" class="btn-nav-admin bg-staff">📝 Comandero Staff</a>
+            <button onclick="alert('Módulo de Almacén desactivado')" class="btn-nav-admin bg-almacen">📦 Almacén</button>
+            <a href="cocina.html" target="_blank" class="btn-nav-admin bg-cocina">🧑‍🍳 Cocina</a>
+            <button onclick="abrirModalCorte()" class="btn-nav-admin bg-corte">💰 Corte</button>
+            <button onclick="abrirModalCobradas()" class="btn-nav-admin bg-cobradas">📁 Cobradas Hoy</button>
+            <button onclick="abrirModalHistorial()" class="btn-nav-admin bg-historial">📅 Historial de Días</button>
+            <button onclick="abrirModalComprobantes()" class="btn-nav-admin bg-comprobantes">📸 Ver Comprobantes</button>
+            <button onclick="abrirModalPrecios()" class="btn-nav-admin bg-precios">✏️ Precios</button>
+            <button onclick="abrirModalTarjeta()" class="btn-nav-admin bg-tarjeta">💳 Config Tarjeta</button>
         </div>
 
-        <div class="seccion-titulo">📝 Caja Principal</div>
-        <div class="cuentas-tabs">
-            <button class="btn-tab active" onclick="cambiarTabCuentas('clientes')">👤 Clientes</button>
-            <button class="btn-tab" onclick="cambiarTabCuentas('staff')">👨‍🍳 Staff</button>
-        </div>
-        <div id="contenedor-cuentas" style="padding:0 15px;"></div>
-
-        <div class="seccion-titulo">⚙️ Ajustes del Sistema</div>
-        <div class="box-ajustes">
-            <button class="btn-ajuste btn-warning">Cambiar Contraseña Admin</button>
-            <button class="btn-ajuste btn-blue">Cambiar WhatsApp Recepción</button>
-            <button class="btn-ajuste btn-green">Cambiar Número de Cuenta Bancaria</button>
-        </div>
-
-        <div class="seccion-titulo">🖼️ Fondo de Clientes (Galería)</div>
-        <div class="box-ajustes">
-            <input type="file" id="file-fondo" accept="image/*" style="width:100%; padding:8px; background:#0d141c; border:1px solid #233040; color:white; border-radius:6px; margin-bottom:10px;">
-            <div style="display:flex; gap:8px;">
-                <button onclick="subirFondo('admin')" style="flex:1; padding:8px; background:#2c3847; color:white; border:none; border-radius:6px; font-weight:bold;">Fondo Admin</button>
-                <button onclick="subirFondo('staff')" style="flex:1; padding:8px; background:#2c3847; color:white; border:none; border-radius:6px; font-weight:bold;">Fondo Staff</button>
-                <button onclick="subirFondo('cliente')" style="flex:1; padding:8px; background:#2c3847; color:white; border:none; border-radius:6px; font-weight:bold;">Fondo Clientes</button>
+        <!-- Caja Principal -->
+        <div class="admin-card">
+            <h3>📝 Caja Principal</h3>
+            <div class="tab-container">
+                <button class="tab-btn active" id="tab-cli" onclick="cambiarTabCaja('Clientes')">👤 Clientes</button>
+                <button class="tab-btn" id="tab-sta" onclick="cambiarTabCaja('Staff')">🧑‍🍳 Staff</button>
             </div>
+            <div id="lista-caja-abierta"></div>
         </div>
 
-        <div class="seccion-titulo">👥 Gestión de Meseros (Max 10)</div>
-        <div class="box-ajustes">
-            <button id="btn-sin-meseros" onclick="toggleSinMeseros()" class="btn-ajuste btn-red">✅ Modo "Sin Meseros" ACTIVADO (Clic para desactivar)</button>
-            <input type="text" id="mesero-nombre" placeholder="Nombre Mesero" style="width:100%; padding:10px; margin-bottom:8px; background:#0d141c; border:1px solid #233040; color:white; border-radius:6px;">
-            <button onclick="agregarMeseroStaff()" class="btn-ajuste btn-green" style="margin-bottom:0;">Agregar Mesero</button>
+        <!-- Ajustes del Sistema -->
+        <div class="admin-card">
+            <h3>⚙️ Ajustes del Sistema</h3>
+            <button class="btn btn-warning" onclick="cambiarPassAdmin()">Cambiar Contraseña Admin</button><br><br>
+            <button class="btn" onclick="cambiarWhatsApp()">Cambiar WhatsApp Recepción</button><br><br>
+            <button class="btn btn-success" onclick="cambiarCuentaBancaria()">Cambiar Número de Cuenta Bancaria</button>
+        </div>
+
+        <!-- Fondo Slideshow -->
+        <div class="admin-card">
+            <h3>🖼️ Fondo de Clientes (Carrusel)</h3>
+            <input type="file" id="slideshow-input" accept="image/*" onchange="subirImagenFondo(event)">
+            <div id="slideshow-preview" style="display:flex; gap:8px; overflow-x:auto; margin-top:10px;"></div>
+        </div>
+
+        <!-- Gestión Meseros -->
+        <div class="admin-card">
+            <h3>👥 Gestión de Meseros (Max 10)</h3>
+            <button id="btn-toggle-sin-meseros" class="btn btn-warning" style="margin-bottom:10px;" onclick="toggleModoSinMeseros()">🚫 Activar Modo Sin Meseros</button>
+            <input type="text" id="mesero-nombre" placeholder="Nombre Mesero">
+            <input type="password" id="mesero-pass" placeholder="Contraseña Mesero" style="margin-top:6px;">
+            <input type="text" id="mesero-mesa" placeholder="Mesas Asignadas (Ej. Mesa 1)" style="margin-top:6px;">
+            <button class="btn btn-success" onclick="agregarMesero()" style="margin-top:8px;">Agregar Mesero</button>
+            <ul id="lista-meseros" style="list-style:none; padding:0; margin-top:10px;"></ul>
+        </div>
+    </div>
+
+    <!-- Modal Adjuntar Comprobante -->
+    <div id="modal-subir-comprobante" class="modal hidden">
+        <div class="modal-content">
+            <h3>📸 Adjuntar Comprobante de Pago</h3>
+            <p style="font-size:0.85rem; color:#94a3b8; margin:0;">Seleccione o tome la foto de la transferencia:</p>
+            <input type="file" id="file-comprobante" accept="image/*">
+            <button class="btn btn-success" onclick="confirmarCobroTransferencia()">Confirmar y Cobrar</button>
+            <button class="btn btn-danger" onclick="cerrarModalComprobante()">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- Modal Genérico -->
+    <div id="modal-generic" class="modal hidden">
+        <div class="modal-content">
+            <h3 id="modal-gen-title">Modal</h3>
+            <div id="modal-gen-body"></div>
+            <button class="btn btn-danger" onclick="cerrarModalGeneric()">Cerrar</button>
         </div>
     </div>
 
     <script src="js/supabase_config.js"></script>
-    <script src="js/app.js"></script>
     <script src="js/admin.js"></script>
-    <script>
-        function verificarClaveDirecta() {
-            const inputVal = document.getElementById('pass-admin').value.trim();
-            if(inputVal === 'IBARRITA' || inputVal === 'ROXANA') {
-                document.getElementById('login-modal').style.display = 'none';
-                document.getElementById('login-modal').classList.add('hidden');
-                document.getElementById('admin-content').classList.remove('hidden');
-                if(typeof cargarCuentasAdmin === 'function') cargarCuentasAdmin('clientes');
-            } else {
-                alert("Contraseña incorrecta");
-            }
-        }
-    </script>
 </body>
 </html>
