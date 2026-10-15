@@ -1,0 +1,1 @@
+const PROMO_IMAGES = ["img/promos/promo_1.jpg", "img/promos/promo_2.jpg", "img/promos/promo_3.jpg", "img/promos/promo_4.jpg", "img/promos/promo_5.jpg", "img/promos/promo_6.jpg", "img/promos/promo_7.jpg", "img/promos/promo_8.jpg", "img/promos/promo_9.jpg", "img/promos/promo_10.jpg"];
