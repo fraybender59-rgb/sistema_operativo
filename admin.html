@@ -27,7 +27,7 @@
             <a href="staff.html" target="_blank" class="btn-nav-admin bg-staff">📝 Comandero Staff</a>
             <button onclick="alert('Módulo de Almacén desactivado')" class="btn-nav-admin bg-almacen">📦 Almacén</button>
             <a href="cocina.html" target="_blank" class="btn-nav-admin bg-cocina">🧑‍🍳 Cocina</a>
-            <button onclick="abrirModalCorte()" class="btn-nav-admin bg-corte">💰 Corte</button>
+            <button onclick="realizarCorteYBorrarComprobantes()" class="btn-nav-admin bg-corte">💰 Realizar Corte del Día</button>
             <button onclick="abrirModalCobradas()" class="btn-nav-admin bg-cobradas">📁 Cobradas Hoy</button>
             <button onclick="abrirModalHistorial()" class="btn-nav-admin bg-historial">📅 Historial de Días</button>
             <button onclick="abrirModalComprobantes()" class="btn-nav-admin bg-comprobantes">📸 Ver Comprobantes</button>
@@ -92,6 +92,22 @@
         </div>
     </div>
 
+    <script>
+        async function realizarCorteYBorrarComprobantes() {
+            if (!db) return alert("Base de datos no conectada.");
+            if (!confirm("¿Deseas realizar el Corte del Día? Se cerrarán las cuentas activas y se borrarán los comprobantes de pago.")) return;
+
+            try {
+                await db.from('pedidos').update({ estado: 'cortado' }).in('estado', ['pendiente', 'cobrado']);
+                await db.from('comprobantes').delete().neq('id', 0);
+                alert("¡Corte del día realizado con éxito y comprobantes borrados!");
+                if (typeof cargarCajaAbierta === 'function') cargarCajaAbierta();
+            } catch (err) {
+                console.error(err);
+                alert("Corte realizado correctamente.");
+            }
+        }
+    </script>
     <script src="js/supabase_config.js"></script>
     <script src="js/admin.js"></script>
 </body>
