@@ -3,6 +3,22 @@ let tabActiva = 'Clientes';
 let pedidoEnCobroTransf = null;
 let miTokenSesion = localStorage.getItem('my_session_token') || '';
 
+const CATALOGO_MENU = [
+    { id: 1, categoria: 'Cócteles', nombre: 'Cóctel de Camarón Grande', precio: 150.00 },
+    { id: 2, categoria: 'Cócteles', nombre: 'Cóctel camaron chico', precio: 120.00 },
+    { id: 3, categoria: 'Céviches', nombre: 'Ceviche de Camarón grande', precio: 140.00 },
+    { id: 4, categoria: 'Céviches', nombre: 'Ceviche de Camarones chico', precio: 110.00 },
+    { id: 5, categoria: 'Céviches', nombre: 'Ceviche de pescado grande', precio: 130.00 },
+    { id: 6, categoria: 'Céviches', nombre: 'Ceviche de pescado chic', precio: 130.00 },
+    { id: 7, categoria: 'Aguachiles', nombre: 'Aguachile de Camarón', precio: 80.00 },
+    { id: 8, categoria: 'Aguachiles', nombre: 'Aguachile de Pescado', precio: 70.00 },
+    { id: 9, categoria: 'Tacos', nombre: 'orden tacos gobernador (4 tacos)', precio: 220.00 },
+    { id: 10, categoria: 'Tacos', nombre: 'Orden tacos estilo baja (4 tacos)', precio: 200.00 },
+    { id: 11, categoria: 'Combos', nombre: 'Combo Tacos Gobernador + Corona', precio: 220.00 },
+    { id: 12, categoria: 'Combos', nombre: 'Combo Cóctel Camarón + Corona', precio: 160.00 },
+    { id: 13, categoria: 'Combos', nombre: 'Combo Aguachile Camarón + Corona', precio: 100.00 }
+];
+
 document.addEventListener('DOMContentLoaded', () => {
     limpiarHistorialViejo();
     syncPass();
@@ -204,7 +220,7 @@ function abrirModalCorte() {
             <hr style="border-color:#334155; margin:10px 0;">
             <p style="font-size:1.3rem; color:#10b981; margin:5px 0;"><b>Total General: $${totalGen.toFixed(2)}</b></p>
 
-            <button class="btn btn-warning" style="margin-top:15px; padding:12px; font-size:1rem; font-weight:bold;" onclick="ejecutarCorteConRespaldo()">🌅 REALIZAR CORTE DEL DÍA (Guarda en Historial x 1 Mes, Limpia Comprobantes y Cierra Sesión)</button>
+            <button class="btn btn-warning" style="margin-top:15px; padding:12px; font-size:1rem; font-weight:bold;" onclick="ejecutarCorteConRespaldo()">🌅 REALIZAR CORTE DEL DÍA (Acumula hoy, Guarda Historial x 30 días, Limpia Comprobantes y Cierra Sesión)</button>
             <button class="btn btn-danger" style="margin-top:10px; padding:10px; font-size:0.9rem;" onclick="cerrarSesionTodos()">🔒 Cerrar Sesión en TODOS los Navegadores Ahora</button>
         `;
 
@@ -219,6 +235,8 @@ async function ejecutarCorteConRespaldo() {
     const todos = await obtenerPedidosSync();
     const cobrados = todos.filter(p => p.estado === 'cobrado');
 
+    if (cobrados.length === 0) return alert('⚠️ No hay cuentas cobradas para realizar el corte.');
+
     const totEfectivo = cobrados.filter(p => p.metodo_pago && p.metodo_pago.includes('Efectivo')).reduce((sum, p) => sum + p.total, 0);
     const totTransf = cobrados.filter(p => p.metodo_pago && p.metodo_pago.includes('Transferencia')).reduce((sum, p) => sum + p.total, 0);
     const totalGen = totEfectivo + totTransf;
@@ -232,18 +250,28 @@ async function ejecutarCorteConRespaldo() {
 
     const hoyStr = new Date().toLocaleDateString('es-MX', { year: 'numeric', month: '2-digit', day: '2-digit' });
 
-    const nuevoCorte = {
-        fecha: hoyStr,
-        timestamp: Date.now(),
-        efectivo: totEfectivo,
-        transferencia: totTransf,
-        total: totalGen,
-        comprobantes: comprobantes,
-        pedidos: cobrados
-    };
-
     let cortes = JSON.parse(localStorage.getItem('mar_y_sazon_cortes') || '[]');
-    cortes.unshift(nuevoCorte);
+    let corteExistente = cortes.find(c => c.fecha === hoyStr);
+
+    if (corteExistente) {
+        corteExistente.efectivo += totEfectivo;
+        corteExistente.transferencia += totTransf;
+        corteExistente.total += totalGen;
+        corteExistente.comprobantes = [...corteExistente.comprobantes, ...comprobantes];
+        corteExistente.pedidos = [...corteExistente.pedidos, ...cobrados];
+    } else {
+        const nuevoCorte = {
+            fecha: hoyStr,
+            timestamp: Date.now(),
+            efectivo: totEfectivo,
+            transferencia: totTransf,
+            total: totalGen,
+            comprobantes: comprobantes,
+            pedidos: cobrados
+        };
+        cortes.unshift(nuevoCorte);
+    }
+
     localStorage.setItem('mar_y_sazon_cortes', JSON.stringify(cortes));
 
     let pedidos = getPedidosLocales();
@@ -259,7 +287,7 @@ async function ejecutarCorteConRespaldo() {
     const nuevoToken = 'CORTE_' + Date.now();
     await setConfig('admin_session_token', nuevoToken);
 
-    alert(`✅ Corte del día (${hoyStr}) realizado exitosamente:\n- Resumen y Comprobantes guardados en Historial por 1 Mes.\n- Botón "Ver Comprobantes" limpiado.\n- Sesión de Administración CERRADA en todos los dispositivos.`);
+    alert(`✅ Corte del día (${hoyStr}) procesado exitosamente y acumulado en Historial. Se han limpiado los comprobantes activos y cerrado sesión globalmente.`);
     cerrarModalGeneric();
     cerrarAdmin();
 }
@@ -392,6 +420,44 @@ function verDetalleCorte(idx) {
     showModalGen(`Detalle Corte ${c.fecha}`, html);
 }
 
+async function abrirModalPrecios() {
+    let html = '<div style="display:flex; flex-direction:column; gap:10px;">';
+    
+    CATALOGO_MENU.forEach(item => {
+        const pLocal = localStorage.getItem(`precio_prod_${item.id}`) || item.precio;
+        html += `
+            <div style="background:#0f172a; padding:10px; border-radius:6px; display:flex; justify-content:space-between; align-items:center; border:1px solid #334155;">
+                <div>
+                    <b>${item.nombre}</b><br>
+                    <small style="color:#f59e0b;">Precio actual: $${parseFloat(pLocal).toFixed(2)}</small>
+                </div>
+                <button class="btn btn-warning" style="width:auto; padding:6px 12px;" onclick="editarPrecioProducto(${item.id}, '${item.nombre}', ${pLocal})">✏️ Modificar</button>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    showModalGen('✏️ Configuración de Precios', html);
+}
+
+async function editarPrecioProducto(id, nombre, precioActual) {
+    const nuevo = prompt(`Ingrese el nuevo precio para "${nombre}":`, precioActual);
+    if (nuevo !== null && !isNaN(nuevo) && nuevo.trim() !== '') {
+        const pass = prompt('Ingrese contraseña de ADMINISTRACIÓN (ROXANA) para confirmar y aplicar el cambio:');
+        if (pass === currentAdminPass || pass === 'ROXANA') {
+            await actualizarPrecioProducto(id, parseFloat(nuevo));
+            alert(`✅ El precio de "${nombre}" ha sido actualizado a $${parseFloat(nuevo).toFixed(2)}.`);
+            abrirModalPrecios();
+        } else {
+            alert('❌ Contraseña de administración incorrecta. Cambio rechazado.');
+        }
+    }
+}
+
+function abrirModalTarjeta() {
+    cambiarCuentaBancaria();
+}
+
 function showModalGen(title, body) {
     document.getElementById('modal-gen-title').innerText = title;
     document.getElementById('modal-gen-body').innerHTML = body;
@@ -402,4 +468,108 @@ function cerrarModalGeneric() {
     document.getElementById('modal-generic').classList.add('hidden');
 }
 
-// (Resto de las funciones de admin: subirImagenFondo, agregarMesero, etc, se mantienen intactas en admin_limpio.js)
+async function cambiarPassAdmin() {
+    const newPass = prompt('Ingrese la NUEVA contraseña de administración:');
+    if (newPass) {
+        await setConfig('admin_password', newPass);
+        currentAdminPass = newPass;
+        alert('Contraseña actualizada con éxito.');
+    }
+}
+
+async function cambiarWhatsApp() {
+    const newWa = prompt('Ingrese el nuevo número de WhatsApp (10 dígitos):');
+    if (newWa) {
+        await setConfig('whatsapp_num', newWa);
+        alert('Número de WhatsApp actualizado.');
+    }
+}
+
+async function cambiarCuentaBancaria() {
+    const cuentaActual = await getConfig('cuenta_transferencia', '1234 5678 9012 3456 (BBVA)');
+    const nuevaCuenta = prompt('Ingrese el NUEVO número de cuenta bancaria:', cuentaActual);
+    if (nuevaCuenta) {
+        await setConfig('cuenta_transferencia', nuevaCuenta);
+        alert('Cuenta bancaria actualizada correctamente.');
+    }
+}
+
+async function agregarMesero() {
+    const nombre = document.getElementById('mesero-nombre').value;
+    const pass = document.getElementById('mesero-pass').value;
+    const mesa = document.getElementById('mesero-mesa').value;
+
+    if (!nombre || !pass) return alert('Completa el nombre y contraseña del mesero.');
+
+    if (_supabase) {
+        try {
+            await _supabase.from('meseros').insert([{ nombre, password: pass, mesas_asignadas: mesa }]);
+        } catch(e){}
+    }
+    alert('Mesero registrado.');
+    cargarMeserosAdmin();
+}
+
+async function cargarMeserosAdmin() {
+    const ul = document.getElementById('lista-meseros');
+    if (_supabase) {
+        try {
+            const { data } = await _supabase.from('meseros').select('*');
+            if (data && data.length > 0) {
+                ul.innerHTML = data.map(m => `
+                    <li style="background:#0f172a; padding:8px; margin-bottom:5px; border-radius:5px; display:flex; justify-content:space-between; align-items:center;">
+                        <span>👨‍🍳 <b>${m.nombre}</b> (${m.mesas_asignadas || 'Sin mesa'})</span>
+                        <button class="btn btn-danger" style="width:auto; padding:4px 8px;" onclick="eliminarMesero(${m.id})">Borrar</button>
+                    </li>
+                `).join('');
+                return;
+            }
+        } catch(e){}
+    }
+    ul.innerHTML = '<li style="font-size:0.85rem; color:#94a3b8;">Meseros activos.</li>';
+}
+
+async function eliminarMesero(id) {
+    const p = prompt(`Ingrese contraseña de administración (ROXANA) para eliminar mesero:`);
+    if (p === currentAdminPass || p === 'ROXANA') {
+        if (_supabase) await _supabase.from('meseros').delete().eq('id', id);
+        cargarMeserosAdmin();
+    } else alert('Contraseña incorrecta.');
+}
+
+async function subirImagenFondo(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+        const raw = await getConfig('fondo_slideshow', '[]');
+        let imgs = [];
+        try { imgs = JSON.parse(raw); } catch(err){}
+        imgs.push(reader.result);
+        await setConfig('fondo_slideshow', JSON.stringify(imgs));
+        cargarSlideshowPreview();
+    };
+    reader.readAsDataURL(file);
+}
+
+async function cargarSlideshowPreview() {
+    const raw = await getConfig('fondo_slideshow', '[]');
+    let imgs = [];
+    try { imgs = JSON.parse(raw); } catch(e){}
+    const prev = document.getElementById('slideshow-preview');
+    prev.innerHTML = imgs.map((img, idx) => `
+        <div style="position:relative;">
+            <img src="${img}" style="width:60px; height:60px; object-fit:cover; border-radius:5px;">
+            <button onclick="borrarImgSlide(${idx})" style="position:absolute; top:0; right:0; background:red; color:white; border:none; border-radius:50%; width:20px; height:20px; font-size:12px; cursor:pointer;">x</button>
+        </div>
+    `).join('');
+}
+
+async function borrarImgSlide(idx) {
+    const raw = await getConfig('fondo_slideshow', '[]');
+    let imgs = [];
+    try { imgs = JSON.parse(raw); } catch(e){}
+    imgs.splice(idx, 1);
+    await setConfig('fondo_slideshow', JSON.stringify(imgs));
+    cargarSlideshowPreview();
+}
