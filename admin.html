@@ -8,46 +8,41 @@ cat << 'EOF' > admin.html
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-    <!-- Modal Login Admin -->
     <div id="admin-login-modal" class="modal">
         <div class="modal-content">
             <h3>🔒 Acceso Restringido</h3>
             <input type="password" id="admin-pass-input" placeholder="Contraseña Admin">
-            <button class="btn" id="btn-admin-login">Ingresar</button>
+            <button class="btn btn-success" id="btn-admin-login">Ingresar</button>
         </div>
     </div>
 
     <div id="admin-panel" class="admin-grid hidden">
-        <header style="background:none; border:none;">
+        <header style="background:none; border:none; padding:10px 0;">
             <h1>⚙️ Administración</h1>
         </header>
 
-        <!-- Ajustes Configuración -->
         <div class="admin-card">
             <h3>🔑 Configuración General</h3>
             <button class="btn btn-warning" id="btn-change-pass">Cambiar Contraseña Admin</button><br><br>
-            <button class="btn" id="btn-change-wa">Cambiar WhatsApp de Recepción</button><br><br>
-            <button class="btn" id="btn-change-bank">Cambiar Cuenta de Transferencia</button>
+            <button class="btn" id="btn-change-wa">Cambiar WhatsApp Recepción</button><br><br>
+            <button class="btn" id="btn-change-bank">Cambiar Cuenta Transferencia</button>
         </div>
 
-        <!-- Gestión de Imágenes Slideshow -->
         <div class="admin-card">
-            <h3>🖼️ Fondo de Clientes (Slideshow)</h3>
+            <h3>🖼️ Fondo de Clientes (Carrusel)</h3>
             <input type="file" id="slideshow-input" accept="image/*">
-            <div id="slideshow-preview" style="display:flex; gap:5px; overflow-x:auto; margin-top:10px;"></div>
+            <div id="slideshow-preview" style="display:flex; gap:8px; overflow-x:auto; margin-top:10px;"></div>
         </div>
 
-        <!-- Gestión de Meseros -->
         <div class="admin-card">
             <h3>👥 Gestión de Meseros (Max 10)</h3>
             <input type="text" id="mesero-nombre" placeholder="Nombre Mesero">
-            <input type="password" id="mesero-pass" placeholder="Contraseña Mesero">
-            <input type="text" id="mesero-mesa" placeholder="Mesas Asignadas (Ej. Mesa 1, Mesa 2)">
-            <button class="btn btn-success" id="btn-add-mesero" style="margin-top:8px;">Agregar / Editar Mesero</button>
+            <input type="password" id="mesero-pass" placeholder="Contraseña Mesero" style="margin-top:6px;">
+            <input type="text" id="mesero-mesa" placeholder="Mesas Asignadas (Ej. Mesa 1)" style="margin-top:6px;">
+            <button class="btn btn-success" id="btn-add-mesero" style="margin-top:8px;">Agregar / Guardar Mesero</button>
             <ul id="lista-meseros" style="list-style:none; padding:0; margin-top:10px;"></ul>
         </div>
 
-        <!-- Control de Cuentas y Cancelaciones -->
         <div class="admin-card">
             <h3>📋 Cuentas Activas y Cancelación</h3>
             <div id="lista-pedidos-admin"></div>

@@ -28,22 +28,22 @@ cat << 'EOF' > index.html
         <div id="info-transferencia" class="hidden" style="font-size: 0.85rem; color: #f59e0b; text-align: center;"></div>
         <div style="display:flex; justify-content:space-between; align-items:center;">
             <span>Total: $<b id="total-price">0.00</b></span>
-            <button class="btn btn-success" id="btn-enviar-pedido" style="width: auto; padding: 8px 15px;">🚀 Pedir a Cocina</button>
+            <button class="btn btn-success" id="btn-enviar-pedido" style="width: auto; padding: 10px 20px;">🚀 Pedir a Cocina</button>
         </div>
     </footer>
 
-    <!-- Modal para Seleccionar Cantidad y Comentarios -->
+    <!-- Modal Selector de Cantidad y Notas -->
     <div id="modal-item" class="modal hidden">
         <div class="modal-content">
             <h3 id="modal-title">Platillo</h3>
-            <p id="modal-desc" style="color: #94a3b8; font-size: 0.9rem;"></p>
+            <p id="modal-desc" style="color: #94a3b8; font-size: 0.85rem; margin:0;"></p>
             <div class="qty-control">
                 <button class="qty-btn" id="btn-minus">-</button>
                 <span id="modal-qty" style="font-size: 1.5rem; font-weight: bold;">1</span>
                 <button class="qty-btn" id="btn-plus">+</button>
             </div>
-            <textarea id="modal-comment" placeholder="Agregar comentarios (Ej. Sin cebolla, salsa aparte...)"></textarea>
-            <button class="btn" id="btn-add-modal">Agregar al Pedido</button>
+            <textarea id="modal-comment" rows="2" placeholder="Notas/Comentarios (Ej. Sin cebolla, picante aparte...)"></textarea>
+            <button class="btn btn-success" id="btn-add-modal">Agregar al Pedido</button>
             <button class="btn btn-danger" id="btn-close-modal">Cancelar</button>
         </div>
     </div>
