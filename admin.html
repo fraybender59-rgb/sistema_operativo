@@ -13,14 +13,14 @@
             <h3>🔒 Acceso Restringido</h3>
             <p style="color:#aaa; font-size:0.85rem; margin:10px 0;">Ingresa la clave de administrador</p>
             <input type="password" id="pass-admin" placeholder="Clave..." style="text-align:center; padding:10px; width:100%; margin-bottom:12px; background:#0d141c; border:1px solid #2c3e50; color:white; border-radius:6px;">
-            <button onclick="validarAccesoAdmin()" style="width:100%; padding:10px; background:#ff9800; border:none; font-weight:bold; border-radius:6px; cursor:pointer;">Desbloquear Sistema</button>
+            <button onclick="verificarClaveDirecta()" style="width:100%; padding:10px; background:#ff9800; border:none; font-weight:bold; border-radius:6px; cursor:pointer;">Ingresar</button>
         </div>
     </div>
 
     <div id="admin-content" class="hidden">
         <div class="header-title">⚙️ Caja Maestro - Administración</div>
 
-        <!-- Botones Botonera Principal -->
+        <!-- Botonera Principal -->
         <div class="admin-buttons-grid">
             <a href="index.html" class="btn-nav-grid bg-publico">📱 Comandero Público</a>
             <a href="staff.html" class="btn-nav-grid bg-staff">📝 Comandero Staff</a>
@@ -74,6 +74,16 @@
     <script src="js/app.js"></script>
     <script src="js/admin.js"></script>
     <script>
+        function verificarClaveDirecta() {
+            const val = document.getElementById('pass-admin').value.trim();
+            if(val === 'IBARRITA' || val === 'ROXANA') {
+                document.getElementById('login-modal').classList.add('hidden');
+                document.getElementById('admin-content').classList.remove('hidden');
+                if(typeof cargarCuentasAdmin === 'function') cargarCuentasAdmin('clientes');
+            } else {
+                alert("Contraseña incorrecta");
+            }
+        }
         document.addEventListener('DOMContentLoaded', () => cargarFondoPantalla('admin'));
     </script>
 </body>
