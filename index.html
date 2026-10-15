@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comandero - La Queen</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header class="client-header">
+        <h1>👑 Comandero - La Queen</h1>
+        <div class="categories">
+            <button class="cat-btn">Sencillas</button>
+            <button class="cat-btn active">Clásicas</button>
+            <button class="cat-btn">Combinadas</button>
+        </div>
+    </header>
+
+    <main class="menu-grid" id="menu-items">
+        <!-- Los items se cargarán desde JS leyendo la tabla almacén -->
+    </main>
+
+    <footer class="cart-footer">
+        <input type="text" id="nombre-cliente" placeholder="Mesa / Nombre del Cliente">
+        <select id="select-mesero">
+            <option value="">Selecciona tu Mesero...</option>
+        </select>
+        <div class="total-bar">
+            <span>Total: $<span id="total-price">0</span></span>
+            <button class="btn-order" id="btn-enviar-pedido">🚀 Marcar a Cocina</button>
+        </div>
+    </footer>
+
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>

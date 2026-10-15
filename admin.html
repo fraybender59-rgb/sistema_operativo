@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administración</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="admin-container">
+        <h1>⚙️ Administración</h1>
+        
+        <section>
+            <h2>Cambiar Fondo</h2>
+            <input type="file" id="bg-upload" accept="image/*">
+        </section>
+
+        <section>
+            <h2>Meseros (Staff)</h2>
+            <input type="text" id="nombre-mesero" placeholder="Nombre">
+            <button id="btn-agregar-mesero" class="btn">Agregar</button>
+            <ul id="lista-meseros"></ul>
+        </section>
+
+        <section>
+            <h2>Almacén</h2>
+            <input type="text" id="prod-nombre" placeholder="Producto">
+            <input type="number" id="prod-cant" placeholder="Cantidad">
+            <input type="number" id="prod-precio" placeholder="Precio">
+            <button id="btn-agregar-prod" class="btn">Sumar</button>
+            <ul id="lista-almacen"></ul>
+        </section>
+
+        <section>
+            <h2>Cobrar Cuentas</h2>
+            <div id="lista-pedidos"></div>
+        </section>
+    </div>
+
+    <script type="module" src="js/admin.js"></script>
+</body>
+</html>
