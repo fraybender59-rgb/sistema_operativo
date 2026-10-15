@@ -1,8 +1,6 @@
-let modoSinMeseros = true;
-
 function validarAccesoAdmin() {
     const pass = document.getElementById('pass-admin').value;
-    if (pass === 'IBARRITA') {
+    if (pass === 'IBARRITA' || pass === 'ROXANA') {
         document.getElementById('login-modal').classList.add('hidden');
         document.getElementById('admin-content').classList.remove('hidden');
         cargarCuentasAdmin('clientes');
@@ -49,28 +47,14 @@ async function cargarCuentasAdmin(tab) {
 async function cobrarCuenta(pedidoId, metodo) {
     const metodosProtegidos = ['cancelacion', 'cortesia', 'descuento'];
     if (metodosProtegidos.includes(metodo)) {
-        const pass = prompt(`Autorización requerida para ${metodo.toUpperCase()}.
-Ingrese clave admin:`);
-        if (pass !== 'IBARRITA') return alert("Acceso denegado. Contraseña incorrecta.");
+        const pass = prompt(`Autorización requerida para ${metodo.toUpperCase()}.\nIngrese clave admin:`);
+        if (pass !== 'IBARRITA' && pass !== 'ROXANA') return alert("Acceso denegado. Contraseña incorrecta.");
     }
 
     const nuevoEstado = metodo === 'cancelacion' ? 'cancelado' : 'cobrado';
     await db.from('pedidos').update({ estado: nuevoEstado, metodo_pago: metodo }).eq('id', pedidoId);
     alert(`Cuenta procesada: ${metodo.toUpperCase()}`);
     cargarCuentasAdmin('clientes');
-}
-
-function toggleSinMeseros() {
-    modoSinMeseros = !modoSinMeseros;
-    const btn = document.getElementById('btn-sin-meseros');
-    if(modoSinMeseros) {
-        btn.innerText = '✅ Modo "Sin Meseros" ACTIVADO (Clic para desactivar)';
-        btn.style.background = '#d32f2f';
-    } else {
-        btn.innerText = '❌ Modo "Sin Meseros" DESACTIVADO (Clic para activar)';
-        btn.style.background = '#388e3c';
-    }
-    if(db) db.from('configuracion').upsert([{ clave: 'modo_sin_meseros', valor: modoSinMeseros ? 'true' : 'false' }]);
 }
 
 async function agregarMeseroStaff() {
