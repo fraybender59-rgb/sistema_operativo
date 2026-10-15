@@ -3,38 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Punto Staff - Mar y Sazón</title>
+    <title>Punto Staff - Meseros</title>
     <link rel="stylesheet" href="css/styles.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body>
-    <header>
-        <h1>👨‍🍳 Punto Staff - Meseros</h1>
-    </header>
+<body id="body-staff">
+    <div class="header-title">👨‍🍳 Punto Staff - Meseros</div>
 
-    <div class="admin-grid" style="max-width:500px; margin:20px auto; padding:15px;">
-        <div id="staff-form-card" class="admin-card">
-            <h3>Identificación de Mesero</h3>
-            <select id="staff-select-mesero"><option value="">Selecciona tu Nombre...</option></select>
-            <input type="password" id="staff-pass" placeholder="Contraseña Mesero" style="margin-top:8px;">
-            <input type="text" id="staff-cliente" placeholder="Mesa / Nombre del Cliente" style="margin-top:8px;">
-            <button class="btn btn-success" onclick="ingresarMenuStaff()" style="margin-top:12px;">Ingresar al Menú de Mesero</button>
+    <div id="bloqueo-staff" class="hidden" style="margin:20px; padding:15px; background:#d32f2f; border-radius:10px; text-align:center;">
+        <h3>🚫 Acceso Bloqueado</h3>
+        <p style="margin-top:8px;">El Modo "Sin Meseros" se encuentra activado desde Administración.</p>
+    </div>
+
+    <div id="contenido-staff">
+        <div class="categorias-bar">
+            <button class="active" onclick="filtrarCategoria('todas')">Todas</button>
+            <button onclick="filtrarCategoria('sencillas')">Sencillas</button>
+            <button onclick="filtrarCategoria('clasicas')">Clásicas</button>
+            <button onclick="filtrarCategoria('combinadas')">Combinadas</button>
+            <button onclick="filtrarCategoria('especiales')">Especiales</button>
+            <button onclick="filtrarCategoria('gigantes')">El Tamaño Sí Importa</button>
+            <button onclick="filtrarCategoria('extras')">Extras y Bebidas</button>
         </div>
 
-        <div id="staff-direct-card" class="admin-card hidden">
-            <h3 style="color:var(--accent);">⚡ Comandero Directo (Sin Meseros)</h3>
-            <p style="font-size:0.85rem; color:#94a3b8; margin:0 0 10px 0;">Modo rápido activo. Ingrese únicamente la mesa o cliente:</p>
-            <input type="text" id="staff-direct-cliente" placeholder="Mesa / Nombre del Cliente">
-            <button class="btn btn-success" onclick="ingresarMenuDirecto()" style="margin-top:12px;">🚀 Tomar Pedido Ahora</button>
-        </div>
+        <div id="contenedor-productos" class="grid-productos"></div>
 
-        <div id="staff-orders-section" class="admin-card" style="margin-top:15px;">
-            <h3>Comandas de Mis Mesas / Cancelaciones</h3>
-            <div id="staff-pedidos-list"></div>
+        <div class="cart-footer">
+            <input type="text" id="cliente-nombre" placeholder="Mesa / Nombre del Cliente">
+            <select id="metodo-pago">
+                <option value="efectivo">Efectivo al recibir</option>
+                <option value="transferencia">Transferencia bancaria</option>
+            </select>
+            <div class="cart-footer-row">
+                <span id="cart-total" style="font-size:1.2rem; font-weight:bold; color:#4caf50;">Total: $0.00</span>
+                <button onclick="confirmarPedidoFinal('staff')" class="btn-pedir">🚀 Pedir a Cocina</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Producto -->
+    <div id="modal-producto" class="modal hidden">
+        <div class="modal-content">
+            <h3 id="modal-title" style="color:#ff9800;"></h3>
+            <p id="modal-desc" style="font-size:0.85rem; color:#aaa; margin-bottom:10px;"></p>
+            <div class="qty-control">
+                <button class="qty-btn" onclick="cambiarCantidadModal(-1)">-</button>
+                <span id="qty-count" class="qty-val">1</span>
+                <button class="qty-btn" onclick="cambiarCantidadModal(1)">+</button>
+            </div>
+            <textarea id="modal-notas" rows="3" placeholder="Notas/Comentarios (Ej. Sin cebolla...)"></textarea>
+            <button onclick="agregarModalAlPedido()" style="background:#388e3c; color:white; width:100%; padding:12px; border:none; border-radius:8px; font-weight:bold; cursor:pointer; margin-bottom:8px;">Agregar al Pedido</button>
+            <button onclick="cerrarModalProducto()" style="background:#d32f2f; color:white; width:100%; padding:10px; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">Cancelar</button>
         </div>
     </div>
 
     <script src="js/supabase_config.js"></script>
-    <script src="js/staff.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            cargarFondoPantalla('staff');
+            if(db) {
+                const { data } = await db.from('configuracion').select('valor').eq('clave', 'modo_sin_meseros').single();
+                if(data && data.valor === 'true') {
+                    document.getElementById('bloqueo-staff').classList.remove('hidden');
+                    document.getElementById('contenido-staff').classList.add('hidden');
+                    return;
+                }
+            }
+            renderizarMenuClientes();
+        });
+    </script>
 </body>
 </html>
