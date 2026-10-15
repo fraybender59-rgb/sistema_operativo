@@ -14,6 +14,35 @@ function savePedidosLocales(pedidos) {
     localStorage.setItem('mar_y_sazon_pedidos', JSON.stringify(pedidos));
 }
 
+function limpiarComprobantesAntiguos() {
+    try {
+        let pedidos = getPedidosLocales();
+        const hace7Dias = Date.now() - (7 * 24 * 60 * 60 * 1000);
+        let modificado = false;
+        
+        pedidos.forEach(p => {
+            const fechaP = new Date(p.creado_en || Date.now()).getTime();
+            if (fechaP < hace7Dias && p.comprobante_img) {
+                p.comprobante_img = null;
+                modificado = true;
+            }
+        });
+        
+        if (modificado) savePedidosLocales(pedidos);
+
+        let cortes = JSON.parse(localStorage.getItem('mar_y_sazon_cortes') || '[]');
+        let modCortes = false;
+        cortes.forEach(c => {
+            const fechaC = new Date(c.fecha || Date.now()).getTime();
+            if (fechaC < hace7Dias && c.comprobantes && c.comprobantes.length > 0) {
+                c.comprobantes = [];
+                modCortes = true;
+            }
+        });
+        if (modCortes) localStorage.setItem('mar_y_sazon_cortes', JSON.stringify(cortes));
+    } catch(e){}
+}
+
 async function guardarPedidoSync(pedido) {
     let pedidos = getPedidosLocales();
     pedidos.unshift(pedido);
@@ -49,6 +78,7 @@ async function guardarPedidoSync(pedido) {
 }
 
 async function obtenerPedidosSync() {
+    limpiarComprobantesAntiguos();
     let locales = getPedidosLocales();
     if (_supabase) {
         try {
@@ -115,10 +145,10 @@ async function setConfig(clave, valor) {
 }
 
 async function actualizarPrecioProducto(id, nuevoPrecio) {
+    localStorage.setItem(`precio_prod_${id}`, nuevoPrecio);
     if (_supabase) {
         try {
             await _supabase.from('menu').update({ precio: nuevoPrecio }).eq('id', id);
         } catch(e){}
     }
-    localStorage.setItem(`precio_prod_${id}`, nuevoPrecio);
 }

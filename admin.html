@@ -16,7 +16,7 @@
         </div>
     </div>
 
-    <div id="admin-panel" class="admin-grid hidden">
+    <div id="admin-panel" class="admin-grid hidden" style="padding:15px; max-width:800px; margin:0 auto;">
         <header style="background:none; border:none; padding:10px 0;">
             <h1>⚙️ Caja Maestro - Administración</h1>
         </header>
@@ -27,7 +27,7 @@
             <a href="staff.html" target="_blank" class="btn-nav-admin bg-staff">📝 Comandero Staff</a>
             <button onclick="alert('Módulo de Almacén desactivado')" class="btn-nav-admin bg-almacen">📦 Almacén</button>
             <a href="cocina.html" target="_blank" class="btn-nav-admin bg-cocina">🧑‍🍳 Cocina</a>
-            <button onclick="abrirModalCorte()" class="btn-nav-admin bg-corte">💰 Corte</button>
+            <button onclick="hacerCorteDelDia()" class="btn-nav-admin bg-corte">🌅 Hacer Corte del Día</button>
             <button onclick="abrirModalCobradas()" class="btn-nav-admin bg-cobradas">📁 Cobradas Hoy</button>
             <button onclick="abrirModalHistorial()" class="btn-nav-admin bg-historial">📅 Historial de Días</button>
             <button onclick="abrirModalComprobantes()" class="btn-nav-admin bg-comprobantes">📸 Ver Comprobantes</button>
@@ -46,7 +46,7 @@
         </div>
 
         <!-- Ajustes del Sistema -->
-        <div class="admin-card">
+        <div class="admin-card" style="margin-top:15px;">
             <h3>⚙️ Ajustes del Sistema</h3>
             <button class="btn btn-warning" onclick="cambiarPassAdmin()">Cambiar Contraseña Admin</button><br><br>
             <button class="btn" onclick="cambiarWhatsApp()">Cambiar WhatsApp Recepción</button><br><br>
@@ -54,14 +54,14 @@
         </div>
 
         <!-- Fondo Slideshow -->
-        <div class="admin-card">
+        <div class="admin-card" style="margin-top:15px;">
             <h3>🖼️ Fondo de Clientes (Carrusel)</h3>
             <input type="file" id="slideshow-input" accept="image/*" onchange="subirImagenFondo(event)">
             <div id="slideshow-preview" style="display:flex; gap:8px; overflow-x:auto; margin-top:10px;"></div>
         </div>
 
         <!-- Gestión Meseros -->
-        <div class="admin-card">
+        <div class="admin-card" style="margin-top:15px;">
             <h3>👥 Gestión de Meseros (Max 10)</h3>
             <button id="btn-toggle-sin-meseros" class="btn btn-warning" style="margin-bottom:10px;" onclick="toggleModoSinMeseros()">🚫 Activar Modo Sin Meseros</button>
             <input type="text" id="mesero-nombre" placeholder="Nombre Mesero">

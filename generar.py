@@ -10,13 +10,14 @@ styles_css = ''':root {
     --accent: #f59e0b;
     --danger: #ef4444;
     --success: #10b981;
+    --warm-sand: #d97706;
 }
 
 body {
     font-family: system-ui, -apple-system, sans-serif;
     margin: 0; padding: 0;
-    background-color: var(--dark); color: #fff;
-    min-height: 100vh;
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 40%, #451a03 100%);
+    color: #fff; min-height: 100vh;
 }
 
 #bg-slideshow {
@@ -27,12 +28,13 @@ body {
 
 #bg-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    z-index: -1; background: rgba(15, 23, 42, 0.88);
+    z-index: -1; background: rgba(15, 23, 42, 0.82);
 }
 
 header {
     background: rgba(30, 41, 59, 0.95); padding: 12px 15px; text-align: center;
-    border-bottom: 2px solid var(--primary); position: sticky; top: 0; z-index: 10;
+    border-bottom: 3px solid var(--accent); position: sticky; top: 0; z-index: 10;
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.2);
 }
 
 .staff-banner {
@@ -42,49 +44,49 @@ header {
 
 .promo-banner {
     width: 100%; height: 160px; border-radius: 12px; overflow: hidden;
-    position: relative; margin-bottom: 15px; border: 1px solid #334155;
+    position: relative; margin-bottom: 15px; border: 2px solid var(--accent);
     background-size: cover; background-position: center;
     transition: background-image 0.8s ease-in-out;
 }
 
 .promo-overlay {
     position: absolute; bottom: 0; left: 0; width: 100%;
-    background: linear-gradient(transparent, rgba(15,23,42,0.9));
+    background: linear-gradient(transparent, rgba(15,23,42,0.95));
     padding: 10px; box-sizing: border-box; text-align: center;
 }
 
 .categories { display: flex; gap: 8px; overflow-x: auto; padding: 10px 5px; }
-.cat-btn { background: #334155; color: #fff; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; white-space: nowrap; }
-.cat-btn.active { background: var(--primary); font-weight: bold; }
+.cat-btn { background: #334155; color: #fff; border: 1px solid #475569; padding: 8px 16px; border-radius: 20px; cursor: pointer; white-space: nowrap; font-weight: bold; }
+.cat-btn.active { background: var(--accent); color: #000; border-color: #f59e0b; }
 
 .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; padding: 0 0 170px 0; }
 .menu-card { 
-    background: var(--card); border-radius: 12px; text-align: center; 
+    background: rgba(30, 41, 59, 0.9); border-radius: 12px; text-align: center; 
     border: 1px solid #334155; cursor: pointer; display: flex; flex-direction: column; 
-    justify-content: space-between; overflow: hidden; transition: transform 0.2s;
+    justify-content: space-between; overflow: hidden; transition: transform 0.2s, border-color 0.2s;
 }
-.menu-card:active { transform: scale(0.98); }
-.menu-card-img { width: 100%; height: 110px; object-fit: cover; display: block; border-bottom: 1px solid #334155; }
+.menu-card:active { transform: scale(0.97); border-color: var(--accent); }
+.menu-card-img { width: 100%; height: 120px; object-fit: cover; display: block; background: #0f172a; border-bottom: 1px solid #334155; }
 .menu-card-body { padding: 10px; display: flex; flex-direction: column; justify-content: space-between; flex-grow: 1; }
 .menu-card h3 { margin: 4px 0; font-size: 0.95rem; color: #f8fafc; }
-.menu-card .price { color: var(--accent); font-weight: bold; font-size: 1.1rem; margin-top: 6px; }
+.menu-card .price { color: var(--accent); font-weight: bold; font-size: 1.15rem; margin-top: 6px; }
 
-.cart-footer { position: fixed; bottom: 0; width: 100%; background: rgba(15, 23, 42, 0.98); padding: 12px; box-sizing: border-box; border-top: 1px solid #334155; display: flex; flex-direction: column; gap: 8px; z-index: 20; }
+.cart-footer { position: fixed; bottom: 0; width: 100%; background: rgba(15, 23, 42, 0.98); padding: 12px; box-sizing: border-box; border-top: 2px solid var(--accent); display: flex; flex-direction: column; gap: 8px; z-index: 20; }
 input, select, textarea { padding: 10px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: white; width: 100%; box-sizing: border-box; font-size: 0.95rem; }
 .btn { background: var(--primary); color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; text-align: center; }
 .btn-success { background: var(--success); }
 .btn-danger { background: var(--danger); }
 .btn-warning { background: var(--accent); color: #000; }
 
-.modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 100; }
-.modal-content { background: var(--card); padding: 20px; border-radius: 12px; width: 90%; max-width: 450px; display: flex; flex-direction: column; gap: 12px; border: 1px solid #334155; max-height: 90vh; overflow-y: auto; }
+.modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.88); display: flex; align-items: center; justify-content: center; z-index: 100; }
+.modal-content { background: var(--card); padding: 20px; border-radius: 12px; width: 90%; max-width: 480px; display: flex; flex-direction: column; gap: 12px; border: 1px solid #334155; max-height: 90vh; overflow-y: auto; }
 .hidden { display: none !important; }
 
 .qty-control { display: flex; align-items: center; justify-content: center; gap: 15px; margin: 10px 0; }
 .qty-btn { width: 42px; height: 42px; border-radius: 50%; font-size: 1.4rem; background: var(--primary); color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
 .admin-top-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
-.btn-nav-admin { padding: 12px; border-radius: 8px; border: none; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; font-size: 0.9rem; }
+.btn-nav-admin { padding: 12px; border-radius: 8px; border: none; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; font-size: 0.9rem; text-align: center; }
 
 .bg-publico { background-color: #334155; }
 .bg-staff { background-color: #475569; }
@@ -127,6 +129,35 @@ function savePedidosLocales(pedidos) {
     localStorage.setItem('mar_y_sazon_pedidos', JSON.stringify(pedidos));
 }
 
+function limpiarComprobantesAntiguos() {
+    try {
+        let pedidos = getPedidosLocales();
+        const hace7Dias = Date.now() - (7 * 24 * 60 * 60 * 1000);
+        let modificado = false;
+        
+        pedidos.forEach(p => {
+            const fechaP = new Date(p.creado_en || Date.now()).getTime();
+            if (fechaP < hace7Dias && p.comprobante_img) {
+                p.comprobante_img = null;
+                modificado = true;
+            }
+        });
+        
+        if (modificado) savePedidosLocales(pedidos);
+
+        let cortes = JSON.parse(localStorage.getItem('mar_y_sazon_cortes') || '[]');
+        let modCortes = false;
+        cortes.forEach(c => {
+            const fechaC = new Date(c.fecha || Date.now()).getTime();
+            if (fechaC < hace7Dias && c.comprobantes && c.comprobantes.length > 0) {
+                c.comprobantes = [];
+                modCortes = true;
+            }
+        });
+        if (modCortes) localStorage.setItem('mar_y_sazon_cortes', JSON.stringify(cortes));
+    } catch(e){}
+}
+
 async function guardarPedidoSync(pedido) {
     let pedidos = getPedidosLocales();
     pedidos.unshift(pedido);
@@ -162,6 +193,7 @@ async function guardarPedidoSync(pedido) {
 }
 
 async function obtenerPedidosSync() {
+    limpiarComprobantesAntiguos();
     let locales = getPedidosLocales();
     if (_supabase) {
         try {
@@ -228,12 +260,12 @@ async function setConfig(clave, valor) {
 }
 
 async function actualizarPrecioProducto(id, nuevoPrecio) {
+    localStorage.setItem(`precio_prod_${id}`, nuevoPrecio);
     if (_supabase) {
         try {
             await _supabase.from('menu').update({ precio: nuevoPrecio }).eq('id', id);
         } catch(e){}
     }
-    localStorage.setItem(`precio_prod_${id}`, nuevoPrecio);
 }
 '''
 
@@ -242,7 +274,7 @@ index_html = '''<!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mar y Sazón - Menú</title>
+    <title>Mar y Sazón - Menú Caribeño</title>
     <link rel="stylesheet" href="css/styles.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -253,9 +285,9 @@ index_html = '''<!DOCTYPE html>
     <!-- Modal Promociones Iniciales -->
     <div id="modal-promo-bienvenida" class="modal">
         <div class="modal-content" style="text-align:center;">
-            <h2 style="margin:0; color:var(--accent);">🌊 Especialidades Mar y Sazón</h2>
-            <p style="font-size:0.85rem; color:#94a3b8; margin:4px 0 10px 0;">¡Promociones frescas del día!</p>
-            <img id="promo-slide-img" class="promo-slider-img" src="https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=600&auto=format&fit=crop&q=80" alt="Promoción">
+            <h2 style="margin:0; color:var(--accent);">🌴 Mar y Sazón - Especialidades</h2>
+            <p style="font-size:0.85rem; color:#94a3b8; margin:4px 0 10px 0;">¡Nuestras mejores opciones del día!</p>
+            <img id="promo-slide-img" class="promo-slider-img" src="" alt="Promoción">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
                 <button class="btn" style="width:auto; padding:8px 16px;" onclick="cambiarFotoPromo(-1)">⬅️ Anterior</button>
                 <span id="promo-num" style="font-size:0.9rem; font-weight:bold;">1 / 3</span>
@@ -270,15 +302,15 @@ index_html = '''<!DOCTYPE html>
     </div>
 
     <header>
-        <h1 style="margin:0; font-size:1.4rem; text-align:center;">🌊 Mar y Sazón</h1>
+        <h1 style="margin:0; font-size:1.4rem; text-align:center; color:var(--accent);">🌊 Mar y Sazón 🌴</h1>
         <div class="categories" id="cat-container" style="margin-top:8px;"></div>
     </header>
 
     <main style="padding: 15px;">
-        <!-- Banner Carrusel Promociones -->
-        <div id="top-promo-banner" class="promo-banner" style="background-image: url('https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=600&auto=format&fit=crop&q=80');">
+        <!-- Banner Promocional -->
+        <div id="top-promo-banner" class="promo-banner">
             <div class="promo-overlay">
-                <span style="color:var(--accent); font-weight:bold; font-size:0.9rem;">🔥 Promoción Mar y Sazón</span>
+                <span style="color:var(--accent); font-weight:bold; font-size:0.95rem;">🔥 Especiales Frescos Mar y Sazón</span>
             </div>
         </div>
 
@@ -327,27 +359,31 @@ index_html = '''<!DOCTYPE html>
 </body>
 </html>'''
 
-app_js = '''const MENU_DEFAULT = [
-    { id: 1, categoria: 'Cócteles', nombre: 'Cóctel de Camarón Grande', descripcion: 'Cóctel grande preparado con camarón fresco', precio: 150.00, img: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=500&auto=format&fit=crop&q=80' },
-    { id: 2, categoria: 'Cócteles', nombre: 'Cóctel camaron chico', descripcion: 'Cóctel chico de camarón fresco', precio: 120.00, img: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=500&auto=format&fit=crop&q=80' },
-    { id: 3, categoria: 'Céviches', nombre: 'Ceviche de Camarón grande', descripcion: 'Ceviche fresco de camarón picado', precio: 140.00, img: 'https://images.unsplash.com/photo-1535399831218-d5bd36d1a6b3?w=500&auto=format&fit=crop&q=80' },
-    { id: 4, categoria: 'Céviches', nombre: 'Ceviche de Camarones chico', descripcion: 'Porción chica de ceviche de camarón', precio: 110.00, img: 'https://images.unsplash.com/photo-1535399831218-d5bd36d1a6b3?w=500&auto=format&fit=crop&q=80' },
-    { id: 5, categoria: 'Céviches', nombre: 'Ceviche de pescado grande', descripcion: 'Ceviche tradicional de pescado fresco', precio: 130.00, img: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=500&auto=format&fit=crop&q=80' },
-    { id: 6, categoria: 'Céviches', nombre: 'Ceviche de pescado chic', descripcion: 'Porción chica de ceviche de pescado', precio: 130.00, img: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=500&auto=format&fit=crop&q=80' },
-    { id: 7, categoria: 'Aguachiles', nombre: 'Aguachile de Camarón', descripcion: 'Camarones curtidos en limón y chile', precio: 80.00, img: 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=500&auto=format&fit=crop&q=80' },
-    { id: 8, categoria: 'Aguachiles', nombre: 'Aguachile de Pescado', descripcion: 'Pescado fresco curtido en limón', precio: 70.00, img: 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=500&auto=format&fit=crop&q=80' },
-    { id: 9, categoria: 'Tacos', nombre: 'orden tacos gobernador (4 tacos)', descripcion: '4 tacos gobernador con camarón y queso', precio: 220.00, img: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=500&auto=format&fit=crop&q=80' },
-    { id: 10, categoria: 'Tacos', nombre: 'Orden tacos estilo baja (4 tacos)', descripcion: '4 tacos de pescado capeado estilo Baja', precio: 200.00, img: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=500&auto=format&fit=crop&q=80' },
-    { id: 11, categoria: 'Combos', nombre: 'Combo Tacos Gobernador + Corona', descripcion: '4 Tacos Gobernador + 1 Cerveza Corona', precio: 220.00, img: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=500&auto=format&fit=crop&q=80' },
-    { id: 12, categoria: 'Combos', nombre: 'Combo Cóctel Camarón + Corona', descripcion: '1 Cóctel de Camarón + 1 Cerveza Corona', precio: 160.00, img: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=500&auto=format&fit=crop&q=80' },
-    { id: 13, categoria: 'Combos', nombre: 'Combo Aguachile Camarón + Corona', descripcion: '1 Aguachile de Camarón + 1 Cerveza Corona', precio: 100.00, img: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=500&auto=format&fit=crop&q=80' }
+app_js = '''
+// Imágenes SVG garantizadas que cargan sin necesidad de conexión externa
+const SVG_COCTEL = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200" viewBox="0 0 300 200"><rect width="300" height="200" fill="%230f172a"/><path d="M100 60 L200 60 L150 130 Z" fill="%23f59e0b" opacity="0.8"/><rect x="145" y="130" width="10" height="40" fill="%23cbd5e1"/><rect x="120" y="170" width="60" height="10" fill="%23cbd5e1"/><circle cx="150" cy="50" r="15" fill="%23ef4444"/><text x="150" y="190" fill="%2338bdf8" font-size="14" font-family="sans-serif" text-anchor="middle">Cóctel de Camarón</text></svg>';
+const SVG_CEVICHE = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200" viewBox="0 0 300 200"><rect width="300" height="200" fill="%230f172a"/><circle cx="150" cy="110" r="60" fill="%231e293b" stroke="%23f59e0b" stroke-width="4"/><circle cx="130" cy="100" r="12" fill="%2310b981"/><circle cx="165" cy="115" r="14" fill="%23ef4444"/><circle cx="150" cy="125" r="10" fill="%23f59e0b"/><text x="150" y="190" fill="%2338bdf8" font-size="14" font-family="sans-serif" text-anchor="middle">Ceviche Fresco</text></svg>';
+const SVG_AGUACHILE = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200" viewBox="0 0 300 200"><rect width="300" height="200" fill="%230f172a"/><ellipse cx="150" cy="110" rx="70" ry="45" fill="%23064e3b" stroke="%2310b981" stroke-width="4"/><path d="M110 110 Q 150 80 190 110" stroke="%23ef4444" stroke-width="6" fill="none"/><text x="150" y="190" fill="%2338bdf8" font-size="14" font-family="sans-serif" text-anchor="middle">Aguachile Especial</text></svg>';
+const SVG_TACOS = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200" viewBox="0 0 300 200"><rect width="300" height="200" fill="%230f172a"/><path d="M80 130 A 70 50 0 0 1 220 130 Z" fill="%23d97706"/><path d="M90 125 A 60 40 0 0 1 210 125 Z" fill="%23ef4444"/><text x="150" y="190" fill="%2338bdf8" font-size="14" font-family="sans-serif" text-anchor="middle">Tacos Gobernador / Baja</text></svg>';
+const SVG_COMBO = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200" viewBox="0 0 300 200"><rect width="300" height="200" fill="%230f172a"/><rect x="80" y="60" width="50" height="90" rx="8" fill="%23f59e0b"/><rect x="170" y="50" width="35" height="100" rx="5" fill="%23d97706"/><text x="150" y="190" fill="%2338bdf8" font-size="14" font-family="sans-serif" text-anchor="middle">Combo + Cerveza</text></svg>';
+
+const MENU_DEFAULT = [
+    { id: 1, categoria: 'Cócteles', nombre: 'Cóctel de Camarón Grande', descripcion: 'Cóctel grande preparado con camarón fresco', precio: 150.00, img: SVG_COCTEL },
+    { id: 2, categoria: 'Cócteles', nombre: 'Cóctel camaron chico', descripcion: 'Cóctel chico de camarón fresco', precio: 120.00, img: SVG_COCTEL },
+    { id: 3, categoria: 'Céviches', nombre: 'Ceviche de Camarón grande', descripcion: 'Ceviche fresco de camarón picado', precio: 140.00, img: SVG_CEVICHE },
+    { id: 4, categoria: 'Céviches', nombre: 'Ceviche de Camarones chico', descripcion: 'Porción chica de ceviche de camarón', precio: 110.00, img: SVG_CEVICHE },
+    { id: 5, categoria: 'Céviches', nombre: 'Ceviche de pescado grande', descripcion: 'Ceviche tradicional de pescado fresco', precio: 130.00, img: SVG_CEVICHE },
+    { id: 6, categoria: 'Céviches', nombre: 'Ceviche de pescado chic', descripcion: 'Porción chica de ceviche de pescado', precio: 130.00, img: SVG_CEVICHE },
+    { id: 7, categoria: 'Aguachiles', nombre: 'Aguachile de Camarón', descripcion: 'Camarones curtidos en limón y chile', precio: 80.00, img: SVG_AGUACHILE },
+    { id: 8, categoria: 'Aguachiles', nombre: 'Aguachile de Pescado', descripcion: 'Pescado fresco curtido en limón', precio: 70.00, img: SVG_AGUACHILE },
+    { id: 9, categoria: 'Tacos', nombre: 'orden tacos gobernador (4 tacos)', descripcion: '4 tacos gobernador con camarón y queso', precio: 220.00, img: SVG_TACOS },
+    { id: 10, categoria: 'Tacos', nombre: 'Orden tacos estilo baja (4 tacos)', descripcion: '4 tacos de pescado capeado estilo Baja', precio: 200.00, img: SVG_TACOS },
+    { id: 11, categoria: 'Combos', nombre: 'Combo Tacos Gobernador + Corona', descripcion: '4 Tacos Gobernador + 1 Cerveza Corona', precio: 220.00, img: SVG_COMBO },
+    { id: 12, categoria: 'Combos', nombre: 'Combo Cóctel Camarón + Corona', descripcion: '1 Cóctel de Camarón + 1 Cerveza Corona', precio: 160.00, img: SVG_COMBO },
+    { id: 13, categoria: 'Combos', nombre: 'Combo Aguachile Camarón + Corona', descripcion: '1 Aguachile de Camarón + 1 Cerveza Corona', precio: 100.00, img: SVG_COMBO }
 ];
 
-const PROMO_SLIDES = [
-    'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=600&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1535399831218-d5bd36d1a6b3?w=600&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=600&auto=format&fit=crop&q=80'
-];
+const PROMO_SLIDES = [SVG_COCTEL, SVG_CEVICHE, SVG_TACOS];
 
 let currentPromoIdx = 0;
 let menuData = [...MENU_DEFAULT];
@@ -357,6 +393,7 @@ let cantidadTemp = 1;
 let esModoStaff = false;
 
 document.addEventListener('DOMContentLoaded', async () => {
+    limpiarComprobantesAntiguos();
     await sincronizarMenu();
     await comprobarModoSinMeseros();
     detectarModoStaff();
@@ -365,33 +402,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     cargarMeseros();
     cargarCuentaTransferencia();
     iniciarSlideshowPromos();
+    
+    // Cargar imagen inicial en modal bienvenida
+    document.getElementById('promo-slide-img').src = PROMO_SLIDES[0];
 });
 
 async function sincronizarMenu() {
-    if (_supabase) {
-        try {
-            const { data } = await _supabase.from('menu').select('*');
-            if (data && data.length > 0) {
-                menuData = data.map(item => {
-                    const localP = localStorage.getItem(`precio_prod_${item.id}`);
-                    const matchDefault = MENU_DEFAULT.find(d => d.id === item.id);
-                    return {
-                        id: item.id,
-                        categoria: item.categoria,
-                        nombre: item.nombre,
-                        descripcion: item.descripcion || (matchDefault ? matchDefault.descripcion : ''),
-                        precio: localP ? parseFloat(localP) : parseFloat(item.precio),
-                        img: (item.img && item.img.length > 5) ? item.img : (matchDefault ? matchDefault.img : 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=500&auto=format&fit=crop&q=80')
-                    };
-                });
-            }
-        } catch(e){}
-    }
+    menuData = MENU_DEFAULT.map(item => {
+        const localP = localStorage.getItem(`precio_prod_${item.id}`);
+        return {
+            ...item,
+            precio: localP ? parseFloat(localP) : item.precio
+        };
+    });
 }
 
 function iniciarSlideshowPromos() {
     const banner = document.getElementById('top-promo-banner');
     if (!banner) return;
+    banner.style.backgroundImage = `url('${PROMO_SLIDES[0]}')`;
     setInterval(() => {
         currentPromoIdx = (currentPromoIdx + 1) % PROMO_SLIDES.length;
         banner.style.backgroundImage = `url('${PROMO_SLIDES[currentPromoIdx]}')`;
@@ -450,10 +479,9 @@ function filtrarCat(cat, btn) {
 function renderMenu(items) {
     const grid = document.getElementById('menu-items');
     if (!grid) return;
-    const fallbackImg = 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=500&auto=format&fit=crop&q=80';
     grid.innerHTML = items.map(item => `
         <div class="menu-card" onclick="abrirModal(${item.id})">
-            <img src="${item.img || fallbackImg}" class="menu-card-img" alt="${item.nombre}" onerror="this.src='${fallbackImg}'">
+            <img src="${item.img}" class="menu-card-img" alt="${item.nombre}">
             <div class="menu-card-body">
                 <div>
                     <h3>${item.nombre}</h3>
@@ -597,7 +625,7 @@ admin_html = '''<!DOCTYPE html>
         </div>
     </div>
 
-    <div id="admin-panel" class="admin-grid hidden">
+    <div id="admin-panel" class="admin-grid hidden" style="padding:15px; max-width:800px; margin:0 auto;">
         <header style="background:none; border:none; padding:10px 0;">
             <h1>⚙️ Caja Maestro - Administración</h1>
         </header>
@@ -608,7 +636,7 @@ admin_html = '''<!DOCTYPE html>
             <a href="staff.html" target="_blank" class="btn-nav-admin bg-staff">📝 Comandero Staff</a>
             <button onclick="alert('Módulo de Almacén desactivado')" class="btn-nav-admin bg-almacen">📦 Almacén</button>
             <a href="cocina.html" target="_blank" class="btn-nav-admin bg-cocina">🧑‍🍳 Cocina</a>
-            <button onclick="abrirModalCorte()" class="btn-nav-admin bg-corte">💰 Corte</button>
+            <button onclick="hacerCorteDelDia()" class="btn-nav-admin bg-corte">🌅 Hacer Corte del Día</button>
             <button onclick="abrirModalCobradas()" class="btn-nav-admin bg-cobradas">📁 Cobradas Hoy</button>
             <button onclick="abrirModalHistorial()" class="btn-nav-admin bg-historial">📅 Historial de Días</button>
             <button onclick="abrirModalComprobantes()" class="btn-nav-admin bg-comprobantes">📸 Ver Comprobantes</button>
@@ -627,7 +655,7 @@ admin_html = '''<!DOCTYPE html>
         </div>
 
         <!-- Ajustes del Sistema -->
-        <div class="admin-card">
+        <div class="admin-card" style="margin-top:15px;">
             <h3>⚙️ Ajustes del Sistema</h3>
             <button class="btn btn-warning" onclick="cambiarPassAdmin()">Cambiar Contraseña Admin</button><br><br>
             <button class="btn" onclick="cambiarWhatsApp()">Cambiar WhatsApp Recepción</button><br><br>
@@ -635,14 +663,14 @@ admin_html = '''<!DOCTYPE html>
         </div>
 
         <!-- Fondo Slideshow -->
-        <div class="admin-card">
+        <div class="admin-card" style="margin-top:15px;">
             <h3>🖼️ Fondo de Clientes (Carrusel)</h3>
             <input type="file" id="slideshow-input" accept="image/*" onchange="subirImagenFondo(event)">
             <div id="slideshow-preview" style="display:flex; gap:8px; overflow-x:auto; margin-top:10px;"></div>
         </div>
 
         <!-- Gestión Meseros -->
-        <div class="admin-card">
+        <div class="admin-card" style="margin-top:15px;">
             <h3>👥 Gestión de Meseros (Max 10)</h3>
             <button id="btn-toggle-sin-meseros" class="btn btn-warning" style="margin-bottom:10px;" onclick="toggleModoSinMeseros()">🚫 Activar Modo Sin Meseros</button>
             <input type="text" id="mesero-nombre" placeholder="Nombre Mesero">
@@ -699,6 +727,7 @@ const CATALOGO_MENU = [
 ];
 
 document.addEventListener('DOMContentLoaded', () => {
+    limpiarComprobantesAntiguos();
     syncPass();
 });
 
@@ -813,7 +842,7 @@ async function confirmarCobroTransferencia() {
         reader.readAsDataURL(file);
     } else {
         await actualizarEstadoPedidoSync(pedidoEnCobroTransf, 'cobrado', 'Transferencia', null);
-        alert(`Cuenta #${pedidoEnCobroTransf} cobrada con Transferencia (Sin foto).`);
+        alert(`Cuenta #${pedidoEnCobroTransf} cobrada con Transferencia.`);
         cerrarModalComprobante();
         renderCajaPrincipal();
     }
@@ -841,20 +870,52 @@ async function cancelarCuenta(id) {
     } else alert('Contraseña incorrecta.');
 }
 
-function abrirModalCorte() {
-    obtenerPedidosSync().then(todos => {
-        const cobrados = todos.filter(p => p.estado === 'cobrado');
-        const totEfectivo = cobrados.filter(p => p.metodo_pago.includes('Efectivo')).reduce((sum, p) => sum + p.total, 0);
-        const totTransf = cobrados.filter(p => p.metodo_pago.includes('Transferencia')).reduce((sum, p) => sum + p.total, 0);
-        const totalGen = totEfectivo + totTransf;
+async function hacerCorteDelDia() {
+    const pass = prompt('Ingrese contraseña de ADMINISTRACIÓN para autorizar el CORTE DEL DÍA:');
+    if (pass !== currentAdminPass && pass !== 'ROXANA') return alert('Contraseña incorrecta.');
 
-        showModalGen('💰 Corte de Caja Hoy', `
-            <p>💵 <b>Efectivo:</b> $${totEfectivo.toFixed(2)}</p>
-            <p>💳 <b>Transferencias:</b> $${totTransf.toFixed(2)}</p>
-            <hr>
-            <p style="font-size:1.2rem; color:#10b981;"><b>Total General: $${totalGen.toFixed(2)}</b></p>
-        `);
-    });
+    const todos = await obtenerPedidosSync();
+    const cobrados = todos.filter(p => p.estado === 'cobrado');
+
+    if (cobrados.length === 0) return alert('No hay cuentas cobradas para generar el corte de hoy.');
+
+    const totEfectivo = cobrados.filter(p => p.metodo_pago.includes('Efectivo')).reduce((sum, p) => sum + p.total, 0);
+    const totTransf = cobrados.filter(p => p.metodo_pago.includes('Transferencia')).reduce((sum, p) => sum + p.total, 0);
+    const totalGen = totEfectivo + totTransf;
+
+    const comprobantes = cobrados.filter(p => p.comprobante_img).map(p => ({
+        id: p.id,
+        cliente: p.cliente_mesa,
+        total: p.total,
+        img: p.comprobante_img
+    }));
+
+    const hoyStr = new Date().toLocaleDateString('es-MX', { year: 'numeric', month: '2-digit', day: '2-digit' });
+
+    const nuevoCorte = {
+        fecha: hoyStr,
+        timestamp: Date.now(),
+        efectivo: totEfectivo,
+        transferencia: totTransf,
+        total: totalGen,
+        comprobantes: comprobantes,
+        pedidos: cobrados
+    };
+
+    let cortes = JSON.parse(localStorage.getItem('mar_y_sazon_cortes') || '[]');
+    cortes.unshift(nuevoCorte);
+    localStorage.setItem('mar_y_sazon_cortes', JSON.stringify(cortes));
+
+    limpiarComprobantesAntiguos();
+
+    showModalGen('🌅 Corte del Día Realizado', `
+        <p>✅ <b>Corte de Hoy (${hoyStr}) guardado exitosamente.</b></p>
+        <hr style="border-color:#334155;">
+        <p>💵 <b>Efectivo:</b> $${totEfectivo.toFixed(2)}</p>
+        <p>💳 <b>Transferencias / Tarjeta:</b> $${totTransf.toFixed(2)}</p>
+        <p style="font-size:1.2rem; color:#10b981;"><b>Venta Total: $${totalGen.toFixed(2)}</b></p>
+        <p style="font-size:0.8rem; color:#94a3b8;">* Los comprobantes asociados se almacenarán por 7 días automáticamente.</p>
+    `);
 }
 
 function abrirModalCobradas() {
@@ -873,7 +934,7 @@ function abrirModalComprobantes() {
     obtenerPedidosSync().then(todos => {
         const conComprobante = todos.filter(p => p.comprobante_img);
         if (conComprobante.length === 0) {
-            showModalGen('📸 Comprobantes de Pago', '<p style="color:#94a3b8;">No se han adjuntado fotos de comprobantes hoy.</p>');
+            showModalGen('📸 Comprobantes de Pago', '<p style="color:#94a3b8;">No se han adjuntado fotos de comprobantes recientemente.</p>');
             return;
         }
 
@@ -884,44 +945,98 @@ function abrirModalComprobantes() {
             </div>
         `).join('');
 
-        showModalGen('📸 Comprobantes de Pago', html);
+        showModalGen('📸 Comprobantes de Pago (Últimos 7 días)', html);
     });
 }
 
 function abrirModalHistorial() {
-    showModalGen('📅 Historial de Días', '<p>Sincronizado con base de datos en nube.</p>');
+    limpiarComprobantesAntiguos();
+    const cortes = JSON.parse(localStorage.getItem('mar_y_sazon_cortes') || '[]');
+    if (cortes.length === 0) {
+        showModalGen('📅 Historial de Cortes por Día', '<p style="color:#94a3b8;">No hay cortes de caja archivados.</p>');
+        return;
+    }
+
+    let html = '<div style="display:flex; flex-direction:column; gap:10px;">';
+    cortes.forEach((c, idx) => {
+        html += `
+            <div style="background:#0f172a; padding:10px; border-radius:8px; border:1px solid #334155;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <b style="color:var(--accent);">📅 Fecha: ${c.fecha}</b>
+                    <b style="color:#10b981;">Total: $${c.total.toFixed(2)}</b>
+                </div>
+                <div style="font-size:0.85rem; margin-top:4px; color:#cbd5e1;">
+                    💵 Efectivo: $${c.efectivo.toFixed(2)} | 💳 Transf/Tarjeta: $${c.transferencia.toFixed(2)}
+                </div>
+                <button class="btn" style="margin-top:8px; padding:6px; font-size:0.85rem;" onclick="verDetalleCorte(${idx})">🔍 Ver Cobros y Comprobantes</button>
+            </div>
+        `;
+    });
+    html += '</div>';
+
+    showModalGen('📅 Historial de Cortes por Día', html);
 }
 
+function verDetalleCorte(idx) {
+    const cortes = JSON.parse(localStorage.getItem('mar_y_sazon_cortes') || '[]');
+    const c = cortes[idx];
+    if (!c) return;
+
+    let html = `
+        <h4>Corte del ${c.fecha}</h4>
+        <p>💵 Efectivo: $${c.efectivo.toFixed(2)} | 💳 Transferencia: $${c.transferencia.toFixed(2)}</p>
+        <p style="color:#10b981; font-weight:bold;">Total Día: $${c.total.toFixed(2)}</p>
+        <hr style="border-color:#334155;">
+        <h5>📸 Comprobantes de Transferencia Adjuntos:</h5>
+    `;
+
+    if (c.comprobantes && c.comprobantes.length > 0) {
+        c.comprobantes.forEach(comp => {
+            html += `
+                <div style="text-align:center; margin-bottom:10px; background:#0f172a; padding:8px; border-radius:6px;">
+                    <small>#${comp.id} - ${comp.cliente} ($${comp.total.toFixed(2)})</small><br>
+                    <img src="${comp.img}" style="max-width:100%; border-radius:6px; margin-top:5px; border:1px solid #334155;">
+                </div>
+            `;
+        });
+    } else {
+        html += '<p style="font-size:0.85rem; color:#94a3b8;">Sin comprobantes o superaron los 7 días de almacenamiento.</p>';
+    }
+
+    showModalGen(`Detalle Corte ${c.fecha}`, html);
+}
+
+/* Modificación Directa de Precios desde Administración */
 async function abrirModalPrecios() {
-    let html = '<div style="display:flex; flex-direction:column; gap:8px;">';
+    let html = '<div style="display:flex; flex-direction:column; gap:10px;">';
     
     CATALOGO_MENU.forEach(item => {
         const pLocal = localStorage.getItem(`precio_prod_${item.id}`) || item.precio;
         html += `
-            <div style="background:#0f172a; padding:10px; border-radius:6px; display:flex; justify-content:space-between; align-items:center;">
+            <div style="background:#0f172a; padding:10px; border-radius:6px; display:flex; justify-content:space-between; align-items:center; border:1px solid #334155;">
                 <div>
                     <b>${item.nombre}</b><br>
                     <small style="color:#f59e0b;">Precio actual: $${parseFloat(pLocal).toFixed(2)}</small>
                 </div>
-                <button class="btn btn-warning" style="width:auto; padding:6px 12px;" onclick="editarPrecioProducto(${item.id}, '${item.nombre}', ${pLocal})">Editar</button>
+                <button class="btn btn-warning" style="width:auto; padding:6px 12px;" onclick="editarPrecioProducto(${item.id}, '${item.nombre}', ${pLocal})">✏️ Modificar</button>
             </div>
         `;
     });
     
     html += '</div>';
-    showModalGen('✏️ Gestión de Precios - Menú', html);
+    showModalGen('✏️ Configuración de Precios', html);
 }
 
 async function editarPrecioProducto(id, nombre, precioActual) {
     const nuevo = prompt(`Ingrese el nuevo precio para "${nombre}":`, precioActual);
-    if (nuevo && !isNaN(nuevo)) {
-        const pass = prompt('Ingrese contraseña de ADMINISTRACIÓN (ROXANA) para guardar cambio:');
+    if (nuevo !== null && !isNaN(nuevo) && nuevo.trim() !== '') {
+        const pass = prompt('Ingrese contraseña de ADMINISTRACIÓN (ROXANA) para confirmar y aplicar el cambio:');
         if (pass === currentAdminPass || pass === 'ROXANA') {
             await actualizarPrecioProducto(id, parseFloat(nuevo));
-            alert(`Precio de "${nombre}" actualizado a $${parseFloat(nuevo).toFixed(2)}.`);
+            alert(`✅ El precio de "${nombre}" ha sido actualizado a $${parseFloat(nuevo).toFixed(2)}.`);
             abrirModalPrecios();
         } else {
-            alert('Contraseña de administración incorrecta.');
+            alert('❌ Contraseña de administración incorrecta. Cambio rechazado.');
         }
     }
 }
@@ -1077,7 +1192,7 @@ staff_html = '''<!DOCTYPE html>
             <button class="btn btn-success" onclick="ingresarMenuDirecto()" style="margin-top:12px;">🚀 Tomar Pedido Ahora</button>
         </div>
 
-        <div id="staff-orders-section" class="admin-card">
+        <div id="staff-orders-section" class="admin-card" style="margin-top:15px;">
             <h3>Comandas de Mis Mesas / Cancelaciones</h3>
             <div id="staff-pedidos-list"></div>
         </div>
@@ -1091,6 +1206,7 @@ staff_html = '''<!DOCTYPE html>
 staff_js = '''let meseroActual = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
+    limpiarComprobantesAntiguos();
     const sinMeseros = await getConfig('modo_sin_meseros', 'false');
     if (sinMeseros === 'true') {
         document.getElementById('staff-form-card').classList.add('hidden');
@@ -1251,4 +1367,4 @@ with open('js/admin.js', 'w') as f: f.write(admin_js)
 with open('js/staff.js', 'w') as f: f.write(staff_js)
 with open('js/cocina.js', 'w') as f: f.write(cocina_js)
 
-print("ACTUALIZACION_IMAGENES_Y_BOTONES_EXITOSA")
+print("CORTE_Y_PRECIOS_INTEGRADOS_CORRECTAMENTE")

@@ -1,6 +1,7 @@
 let meseroActual = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
+    limpiarComprobantesAntiguos();
     const sinMeseros = await getConfig('modo_sin_meseros', 'false');
     if (sinMeseros === 'true') {
         document.getElementById('staff-form-card').classList.add('hidden');

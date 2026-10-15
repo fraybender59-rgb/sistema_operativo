@@ -1,24 +1,28 @@
+
+// Imágenes SVG garantizadas que cargan sin necesidad de conexión externa
+const SVG_COCTEL = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200" viewBox="0 0 300 200"><rect width="300" height="200" fill="%230f172a"/><path d="M100 60 L200 60 L150 130 Z" fill="%23f59e0b" opacity="0.8"/><rect x="145" y="130" width="10" height="40" fill="%23cbd5e1"/><rect x="120" y="170" width="60" height="10" fill="%23cbd5e1"/><circle cx="150" cy="50" r="15" fill="%23ef4444"/><text x="150" y="190" fill="%2338bdf8" font-size="14" font-family="sans-serif" text-anchor="middle">Cóctel de Camarón</text></svg>';
+const SVG_CEVICHE = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200" viewBox="0 0 300 200"><rect width="300" height="200" fill="%230f172a"/><circle cx="150" cy="110" r="60" fill="%231e293b" stroke="%23f59e0b" stroke-width="4"/><circle cx="130" cy="100" r="12" fill="%2310b981"/><circle cx="165" cy="115" r="14" fill="%23ef4444"/><circle cx="150" cy="125" r="10" fill="%23f59e0b"/><text x="150" y="190" fill="%2338bdf8" font-size="14" font-family="sans-serif" text-anchor="middle">Ceviche Fresco</text></svg>';
+const SVG_AGUACHILE = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200" viewBox="0 0 300 200"><rect width="300" height="200" fill="%230f172a"/><ellipse cx="150" cy="110" rx="70" ry="45" fill="%23064e3b" stroke="%2310b981" stroke-width="4"/><path d="M110 110 Q 150 80 190 110" stroke="%23ef4444" stroke-width="6" fill="none"/><text x="150" y="190" fill="%2338bdf8" font-size="14" font-family="sans-serif" text-anchor="middle">Aguachile Especial</text></svg>';
+const SVG_TACOS = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200" viewBox="0 0 300 200"><rect width="300" height="200" fill="%230f172a"/><path d="M80 130 A 70 50 0 0 1 220 130 Z" fill="%23d97706"/><path d="M90 125 A 60 40 0 0 1 210 125 Z" fill="%23ef4444"/><text x="150" y="190" fill="%2338bdf8" font-size="14" font-family="sans-serif" text-anchor="middle">Tacos Gobernador / Baja</text></svg>';
+const SVG_COMBO = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200" viewBox="0 0 300 200"><rect width="300" height="200" fill="%230f172a"/><rect x="80" y="60" width="50" height="90" rx="8" fill="%23f59e0b"/><rect x="170" y="50" width="35" height="100" rx="5" fill="%23d97706"/><text x="150" y="190" fill="%2338bdf8" font-size="14" font-family="sans-serif" text-anchor="middle">Combo + Cerveza</text></svg>';
+
 const MENU_DEFAULT = [
-    { id: 1, categoria: 'Cócteles', nombre: 'Cóctel de Camarón Grande', descripcion: 'Cóctel grande preparado con camarón fresco', precio: 150.00, img: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=500&auto=format&fit=crop&q=80' },
-    { id: 2, categoria: 'Cócteles', nombre: 'Cóctel camaron chico', descripcion: 'Cóctel chico de camarón fresco', precio: 120.00, img: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=500&auto=format&fit=crop&q=80' },
-    { id: 3, categoria: 'Céviches', nombre: 'Ceviche de Camarón grande', descripcion: 'Ceviche fresco de camarón picado', precio: 140.00, img: 'https://images.unsplash.com/photo-1535399831218-d5bd36d1a6b3?w=500&auto=format&fit=crop&q=80' },
-    { id: 4, categoria: 'Céviches', nombre: 'Ceviche de Camarones chico', descripcion: 'Porción chica de ceviche de camarón', precio: 110.00, img: 'https://images.unsplash.com/photo-1535399831218-d5bd36d1a6b3?w=500&auto=format&fit=crop&q=80' },
-    { id: 5, categoria: 'Céviches', nombre: 'Ceviche de pescado grande', descripcion: 'Ceviche tradicional de pescado fresco', precio: 130.00, img: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=500&auto=format&fit=crop&q=80' },
-    { id: 6, categoria: 'Céviches', nombre: 'Ceviche de pescado chic', descripcion: 'Porción chica de ceviche de pescado', precio: 130.00, img: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=500&auto=format&fit=crop&q=80' },
-    { id: 7, categoria: 'Aguachiles', nombre: 'Aguachile de Camarón', descripcion: 'Camarones curtidos en limón y chile', precio: 80.00, img: 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=500&auto=format&fit=crop&q=80' },
-    { id: 8, categoria: 'Aguachiles', nombre: 'Aguachile de Pescado', descripcion: 'Pescado fresco curtido en limón', precio: 70.00, img: 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=500&auto=format&fit=crop&q=80' },
-    { id: 9, categoria: 'Tacos', nombre: 'orden tacos gobernador (4 tacos)', descripcion: '4 tacos gobernador con camarón y queso', precio: 220.00, img: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=500&auto=format&fit=crop&q=80' },
-    { id: 10, categoria: 'Tacos', nombre: 'Orden tacos estilo baja (4 tacos)', descripcion: '4 tacos de pescado capeado estilo Baja', precio: 200.00, img: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=500&auto=format&fit=crop&q=80' },
-    { id: 11, categoria: 'Combos', nombre: 'Combo Tacos Gobernador + Corona', descripcion: '4 Tacos Gobernador + 1 Cerveza Corona', precio: 220.00, img: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=500&auto=format&fit=crop&q=80' },
-    { id: 12, categoria: 'Combos', nombre: 'Combo Cóctel Camarón + Corona', descripcion: '1 Cóctel de Camarón + 1 Cerveza Corona', precio: 160.00, img: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=500&auto=format&fit=crop&q=80' },
-    { id: 13, categoria: 'Combos', nombre: 'Combo Aguachile Camarón + Corona', descripcion: '1 Aguachile de Camarón + 1 Cerveza Corona', precio: 100.00, img: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=500&auto=format&fit=crop&q=80' }
+    { id: 1, categoria: 'Cócteles', nombre: 'Cóctel de Camarón Grande', descripcion: 'Cóctel grande preparado con camarón fresco', precio: 150.00, img: SVG_COCTEL },
+    { id: 2, categoria: 'Cócteles', nombre: 'Cóctel camaron chico', descripcion: 'Cóctel chico de camarón fresco', precio: 120.00, img: SVG_COCTEL },
+    { id: 3, categoria: 'Céviches', nombre: 'Ceviche de Camarón grande', descripcion: 'Ceviche fresco de camarón picado', precio: 140.00, img: SVG_CEVICHE },
+    { id: 4, categoria: 'Céviches', nombre: 'Ceviche de Camarones chico', descripcion: 'Porción chica de ceviche de camarón', precio: 110.00, img: SVG_CEVICHE },
+    { id: 5, categoria: 'Céviches', nombre: 'Ceviche de pescado grande', descripcion: 'Ceviche tradicional de pescado fresco', precio: 130.00, img: SVG_CEVICHE },
+    { id: 6, categoria: 'Céviches', nombre: 'Ceviche de pescado chic', descripcion: 'Porción chica de ceviche de pescado', precio: 130.00, img: SVG_CEVICHE },
+    { id: 7, categoria: 'Aguachiles', nombre: 'Aguachile de Camarón', descripcion: 'Camarones curtidos en limón y chile', precio: 80.00, img: SVG_AGUACHILE },
+    { id: 8, categoria: 'Aguachiles', nombre: 'Aguachile de Pescado', descripcion: 'Pescado fresco curtido en limón', precio: 70.00, img: SVG_AGUACHILE },
+    { id: 9, categoria: 'Tacos', nombre: 'orden tacos gobernador (4 tacos)', descripcion: '4 tacos gobernador con camarón y queso', precio: 220.00, img: SVG_TACOS },
+    { id: 10, categoria: 'Tacos', nombre: 'Orden tacos estilo baja (4 tacos)', descripcion: '4 tacos de pescado capeado estilo Baja', precio: 200.00, img: SVG_TACOS },
+    { id: 11, categoria: 'Combos', nombre: 'Combo Tacos Gobernador + Corona', descripcion: '4 Tacos Gobernador + 1 Cerveza Corona', precio: 220.00, img: SVG_COMBO },
+    { id: 12, categoria: 'Combos', nombre: 'Combo Cóctel Camarón + Corona', descripcion: '1 Cóctel de Camarón + 1 Cerveza Corona', precio: 160.00, img: SVG_COMBO },
+    { id: 13, categoria: 'Combos', nombre: 'Combo Aguachile Camarón + Corona', descripcion: '1 Aguachile de Camarón + 1 Cerveza Corona', precio: 100.00, img: SVG_COMBO }
 ];
 
-const PROMO_SLIDES = [
-    'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=600&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1535399831218-d5bd36d1a6b3?w=600&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=600&auto=format&fit=crop&q=80'
-];
+const PROMO_SLIDES = [SVG_COCTEL, SVG_CEVICHE, SVG_TACOS];
 
 let currentPromoIdx = 0;
 let menuData = [...MENU_DEFAULT];
@@ -28,6 +32,7 @@ let cantidadTemp = 1;
 let esModoStaff = false;
 
 document.addEventListener('DOMContentLoaded', async () => {
+    limpiarComprobantesAntiguos();
     await sincronizarMenu();
     await comprobarModoSinMeseros();
     detectarModoStaff();
@@ -36,33 +41,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     cargarMeseros();
     cargarCuentaTransferencia();
     iniciarSlideshowPromos();
+    
+    // Cargar imagen inicial en modal bienvenida
+    document.getElementById('promo-slide-img').src = PROMO_SLIDES[0];
 });
 
 async function sincronizarMenu() {
-    if (_supabase) {
-        try {
-            const { data } = await _supabase.from('menu').select('*');
-            if (data && data.length > 0) {
-                menuData = data.map(item => {
-                    const localP = localStorage.getItem(`precio_prod_${item.id}`);
-                    const matchDefault = MENU_DEFAULT.find(d => d.id === item.id);
-                    return {
-                        id: item.id,
-                        categoria: item.categoria,
-                        nombre: item.nombre,
-                        descripcion: item.descripcion || (matchDefault ? matchDefault.descripcion : ''),
-                        precio: localP ? parseFloat(localP) : parseFloat(item.precio),
-                        img: (item.img && item.img.length > 5) ? item.img : (matchDefault ? matchDefault.img : 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=500&auto=format&fit=crop&q=80')
-                    };
-                });
-            }
-        } catch(e){}
-    }
+    menuData = MENU_DEFAULT.map(item => {
+        const localP = localStorage.getItem(`precio_prod_${item.id}`);
+        return {
+            ...item,
+            precio: localP ? parseFloat(localP) : item.precio
+        };
+    });
 }
 
 function iniciarSlideshowPromos() {
     const banner = document.getElementById('top-promo-banner');
     if (!banner) return;
+    banner.style.backgroundImage = `url('${PROMO_SLIDES[0]}')`;
     setInterval(() => {
         currentPromoIdx = (currentPromoIdx + 1) % PROMO_SLIDES.length;
         banner.style.backgroundImage = `url('${PROMO_SLIDES[currentPromoIdx]}')`;
@@ -121,10 +118,9 @@ function filtrarCat(cat, btn) {
 function renderMenu(items) {
     const grid = document.getElementById('menu-items');
     if (!grid) return;
-    const fallbackImg = 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=500&auto=format&fit=crop&q=80';
     grid.innerHTML = items.map(item => `
         <div class="menu-card" onclick="abrirModal(${item.id})">
-            <img src="${item.img || fallbackImg}" class="menu-card-img" alt="${item.nombre}" onerror="this.src='${fallbackImg}'">
+            <img src="${item.img}" class="menu-card-img" alt="${item.nombre}">
             <div class="menu-card-body">
                 <div>
                     <h3>${item.nombre}</h3>

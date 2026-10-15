@@ -19,6 +19,7 @@ const CATALOGO_MENU = [
 ];
 
 document.addEventListener('DOMContentLoaded', () => {
+    limpiarComprobantesAntiguos();
     syncPass();
 });
 
@@ -133,7 +134,7 @@ async function confirmarCobroTransferencia() {
         reader.readAsDataURL(file);
     } else {
         await actualizarEstadoPedidoSync(pedidoEnCobroTransf, 'cobrado', 'Transferencia', null);
-        alert(`Cuenta #${pedidoEnCobroTransf} cobrada con Transferencia (Sin foto).`);
+        alert(`Cuenta #${pedidoEnCobroTransf} cobrada con Transferencia.`);
         cerrarModalComprobante();
         renderCajaPrincipal();
     }
@@ -161,20 +162,52 @@ async function cancelarCuenta(id) {
     } else alert('Contraseña incorrecta.');
 }
 
-function abrirModalCorte() {
-    obtenerPedidosSync().then(todos => {
-        const cobrados = todos.filter(p => p.estado === 'cobrado');
-        const totEfectivo = cobrados.filter(p => p.metodo_pago.includes('Efectivo')).reduce((sum, p) => sum + p.total, 0);
-        const totTransf = cobrados.filter(p => p.metodo_pago.includes('Transferencia')).reduce((sum, p) => sum + p.total, 0);
-        const totalGen = totEfectivo + totTransf;
+async function hacerCorteDelDia() {
+    const pass = prompt('Ingrese contraseña de ADMINISTRACIÓN para autorizar el CORTE DEL DÍA:');
+    if (pass !== currentAdminPass && pass !== 'ROXANA') return alert('Contraseña incorrecta.');
 
-        showModalGen('💰 Corte de Caja Hoy', `
-            <p>💵 <b>Efectivo:</b> $${totEfectivo.toFixed(2)}</p>
-            <p>💳 <b>Transferencias:</b> $${totTransf.toFixed(2)}</p>
-            <hr>
-            <p style="font-size:1.2rem; color:#10b981;"><b>Total General: $${totalGen.toFixed(2)}</b></p>
-        `);
-    });
+    const todos = await obtenerPedidosSync();
+    const cobrados = todos.filter(p => p.estado === 'cobrado');
+
+    if (cobrados.length === 0) return alert('No hay cuentas cobradas para generar el corte de hoy.');
+
+    const totEfectivo = cobrados.filter(p => p.metodo_pago.includes('Efectivo')).reduce((sum, p) => sum + p.total, 0);
+    const totTransf = cobrados.filter(p => p.metodo_pago.includes('Transferencia')).reduce((sum, p) => sum + p.total, 0);
+    const totalGen = totEfectivo + totTransf;
+
+    const comprobantes = cobrados.filter(p => p.comprobante_img).map(p => ({
+        id: p.id,
+        cliente: p.cliente_mesa,
+        total: p.total,
+        img: p.comprobante_img
+    }));
+
+    const hoyStr = new Date().toLocaleDateString('es-MX', { year: 'numeric', month: '2-digit', day: '2-digit' });
+
+    const nuevoCorte = {
+        fecha: hoyStr,
+        timestamp: Date.now(),
+        efectivo: totEfectivo,
+        transferencia: totTransf,
+        total: totalGen,
+        comprobantes: comprobantes,
+        pedidos: cobrados
+    };
+
+    let cortes = JSON.parse(localStorage.getItem('mar_y_sazon_cortes') || '[]');
+    cortes.unshift(nuevoCorte);
+    localStorage.setItem('mar_y_sazon_cortes', JSON.stringify(cortes));
+
+    limpiarComprobantesAntiguos();
+
+    showModalGen('🌅 Corte del Día Realizado', `
+        <p>✅ <b>Corte de Hoy (${hoyStr}) guardado exitosamente.</b></p>
+        <hr style="border-color:#334155;">
+        <p>💵 <b>Efectivo:</b> $${totEfectivo.toFixed(2)}</p>
+        <p>💳 <b>Transferencias / Tarjeta:</b> $${totTransf.toFixed(2)}</p>
+        <p style="font-size:1.2rem; color:#10b981;"><b>Venta Total: $${totalGen.toFixed(2)}</b></p>
+        <p style="font-size:0.8rem; color:#94a3b8;">* Los comprobantes asociados se almacenarán por 7 días automáticamente.</p>
+    `);
 }
 
 function abrirModalCobradas() {
@@ -193,7 +226,7 @@ function abrirModalComprobantes() {
     obtenerPedidosSync().then(todos => {
         const conComprobante = todos.filter(p => p.comprobante_img);
         if (conComprobante.length === 0) {
-            showModalGen('📸 Comprobantes de Pago', '<p style="color:#94a3b8;">No se han adjuntado fotos de comprobantes hoy.</p>');
+            showModalGen('📸 Comprobantes de Pago', '<p style="color:#94a3b8;">No se han adjuntado fotos de comprobantes recientemente.</p>');
             return;
         }
 
@@ -204,44 +237,98 @@ function abrirModalComprobantes() {
             </div>
         `).join('');
 
-        showModalGen('📸 Comprobantes de Pago', html);
+        showModalGen('📸 Comprobantes de Pago (Últimos 7 días)', html);
     });
 }
 
 function abrirModalHistorial() {
-    showModalGen('📅 Historial de Días', '<p>Sincronizado con base de datos en nube.</p>');
+    limpiarComprobantesAntiguos();
+    const cortes = JSON.parse(localStorage.getItem('mar_y_sazon_cortes') || '[]');
+    if (cortes.length === 0) {
+        showModalGen('📅 Historial de Cortes por Día', '<p style="color:#94a3b8;">No hay cortes de caja archivados.</p>');
+        return;
+    }
+
+    let html = '<div style="display:flex; flex-direction:column; gap:10px;">';
+    cortes.forEach((c, idx) => {
+        html += `
+            <div style="background:#0f172a; padding:10px; border-radius:8px; border:1px solid #334155;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <b style="color:var(--accent);">📅 Fecha: ${c.fecha}</b>
+                    <b style="color:#10b981;">Total: $${c.total.toFixed(2)}</b>
+                </div>
+                <div style="font-size:0.85rem; margin-top:4px; color:#cbd5e1;">
+                    💵 Efectivo: $${c.efectivo.toFixed(2)} | 💳 Transf/Tarjeta: $${c.transferencia.toFixed(2)}
+                </div>
+                <button class="btn" style="margin-top:8px; padding:6px; font-size:0.85rem;" onclick="verDetalleCorte(${idx})">🔍 Ver Cobros y Comprobantes</button>
+            </div>
+        `;
+    });
+    html += '</div>';
+
+    showModalGen('📅 Historial de Cortes por Día', html);
 }
 
+function verDetalleCorte(idx) {
+    const cortes = JSON.parse(localStorage.getItem('mar_y_sazon_cortes') || '[]');
+    const c = cortes[idx];
+    if (!c) return;
+
+    let html = `
+        <h4>Corte del ${c.fecha}</h4>
+        <p>💵 Efectivo: $${c.efectivo.toFixed(2)} | 💳 Transferencia: $${c.transferencia.toFixed(2)}</p>
+        <p style="color:#10b981; font-weight:bold;">Total Día: $${c.total.toFixed(2)}</p>
+        <hr style="border-color:#334155;">
+        <h5>📸 Comprobantes de Transferencia Adjuntos:</h5>
+    `;
+
+    if (c.comprobantes && c.comprobantes.length > 0) {
+        c.comprobantes.forEach(comp => {
+            html += `
+                <div style="text-align:center; margin-bottom:10px; background:#0f172a; padding:8px; border-radius:6px;">
+                    <small>#${comp.id} - ${comp.cliente} ($${comp.total.toFixed(2)})</small><br>
+                    <img src="${comp.img}" style="max-width:100%; border-radius:6px; margin-top:5px; border:1px solid #334155;">
+                </div>
+            `;
+        });
+    } else {
+        html += '<p style="font-size:0.85rem; color:#94a3b8;">Sin comprobantes o superaron los 7 días de almacenamiento.</p>';
+    }
+
+    showModalGen(`Detalle Corte ${c.fecha}`, html);
+}
+
+/* Modificación Directa de Precios desde Administración */
 async function abrirModalPrecios() {
-    let html = '<div style="display:flex; flex-direction:column; gap:8px;">';
+    let html = '<div style="display:flex; flex-direction:column; gap:10px;">';
     
     CATALOGO_MENU.forEach(item => {
         const pLocal = localStorage.getItem(`precio_prod_${item.id}`) || item.precio;
         html += `
-            <div style="background:#0f172a; padding:10px; border-radius:6px; display:flex; justify-content:space-between; align-items:center;">
+            <div style="background:#0f172a; padding:10px; border-radius:6px; display:flex; justify-content:space-between; align-items:center; border:1px solid #334155;">
                 <div>
                     <b>${item.nombre}</b><br>
                     <small style="color:#f59e0b;">Precio actual: $${parseFloat(pLocal).toFixed(2)}</small>
                 </div>
-                <button class="btn btn-warning" style="width:auto; padding:6px 12px;" onclick="editarPrecioProducto(${item.id}, '${item.nombre}', ${pLocal})">Editar</button>
+                <button class="btn btn-warning" style="width:auto; padding:6px 12px;" onclick="editarPrecioProducto(${item.id}, '${item.nombre}', ${pLocal})">✏️ Modificar</button>
             </div>
         `;
     });
     
     html += '</div>';
-    showModalGen('✏️ Gestión de Precios - Menú', html);
+    showModalGen('✏️ Configuración de Precios', html);
 }
 
 async function editarPrecioProducto(id, nombre, precioActual) {
     const nuevo = prompt(`Ingrese el nuevo precio para "${nombre}":`, precioActual);
-    if (nuevo && !isNaN(nuevo)) {
-        const pass = prompt('Ingrese contraseña de ADMINISTRACIÓN (ROXANA) para guardar cambio:');
+    if (nuevo !== null && !isNaN(nuevo) && nuevo.trim() !== '') {
+        const pass = prompt('Ingrese contraseña de ADMINISTRACIÓN (ROXANA) para confirmar y aplicar el cambio:');
         if (pass === currentAdminPass || pass === 'ROXANA') {
             await actualizarPrecioProducto(id, parseFloat(nuevo));
-            alert(`Precio de "${nombre}" actualizado a $${parseFloat(nuevo).toFixed(2)}.`);
+            alert(`✅ El precio de "${nombre}" ha sido actualizado a $${parseFloat(nuevo).toFixed(2)}.`);
             abrirModalPrecios();
         } else {
-            alert('Contraseña de administración incorrecta.');
+            alert('❌ Contraseña de administración incorrecta. Cambio rechazado.');
         }
     }
 }
