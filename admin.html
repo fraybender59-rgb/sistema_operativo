@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Caja Maestro - Administración</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/styles.css?v=final2">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -16,18 +16,18 @@
         </div>
     </div>
 
-    <div id="admin-panel" class="admin-grid hidden">
+    <div id="admin-panel" class="admin-grid hidden" style="padding:15px; max-width:800px; margin:0 auto;">
         <header style="background:none; border:none; padding:10px 0;">
             <h1>⚙️ Caja Maestro - Administración</h1>
         </header>
 
-        <!-- Botones Principales -->
         <div class="admin-top-grid">
+            <button onclick="cerrarSesionTodos()" class="btn btn-danger" style="grid-column: span 2; padding:12px; margin-bottom:8px; font-weight:bold;">🔒 Cerrar Sesión en TODOS los Navegadores</button>
             <a href="index.html" target="_blank" class="btn-nav-admin bg-publico">📱 Comandero Público</a>
             <a href="staff.html" target="_blank" class="btn-nav-admin bg-staff">📝 Comandero Staff</a>
             <button onclick="alert('Módulo de Almacén desactivado')" class="btn-nav-admin bg-almacen">📦 Almacén</button>
             <a href="cocina.html" target="_blank" class="btn-nav-admin bg-cocina">🧑‍🍳 Cocina</a>
-            <button onclick="realizarCorteYBorrarComprobantes()" class="btn-nav-admin bg-corte">💰 Realizar Corte del Día</button>
+            <button onclick="abrirModalCorte()" class="btn-nav-admin bg-corte">🌅 Corte / Realizar Corte</button>
             <button onclick="abrirModalCobradas()" class="btn-nav-admin bg-cobradas">📁 Cobradas Hoy</button>
             <button onclick="abrirModalHistorial()" class="btn-nav-admin bg-historial">📅 Historial de Días</button>
             <button onclick="abrirModalComprobantes()" class="btn-nav-admin bg-comprobantes">📸 Ver Comprobantes</button>
@@ -35,7 +35,6 @@
             <button onclick="abrirModalTarjeta()" class="btn-nav-admin bg-tarjeta">💳 Config Tarjeta</button>
         </div>
 
-        <!-- Caja Principal -->
         <div class="admin-card">
             <h3>📝 Caja Principal</h3>
             <div class="tab-container">
@@ -45,23 +44,20 @@
             <div id="lista-caja-abierta"></div>
         </div>
 
-        <!-- Ajustes del Sistema -->
-        <div class="admin-card">
+        <div class="admin-card" style="margin-top:15px;">
             <h3>⚙️ Ajustes del Sistema</h3>
             <button class="btn btn-warning" onclick="cambiarPassAdmin()">Cambiar Contraseña Admin</button><br><br>
             <button class="btn" onclick="cambiarWhatsApp()">Cambiar WhatsApp Recepción</button><br><br>
             <button class="btn btn-success" onclick="cambiarCuentaBancaria()">Cambiar Número de Cuenta Bancaria</button>
         </div>
 
-        <!-- Fondo Slideshow -->
-        <div class="admin-card">
+        <div class="admin-card" style="margin-top:15px;">
             <h3>🖼️ Fondo de Clientes (Carrusel)</h3>
             <input type="file" id="slideshow-input" accept="image/*" onchange="subirImagenFondo(event)">
             <div id="slideshow-preview" style="display:flex; gap:8px; overflow-x:auto; margin-top:10px;"></div>
         </div>
 
-        <!-- Gestión Meseros -->
-        <div class="admin-card">
+        <div class="admin-card" style="margin-top:15px;">
             <h3>👥 Gestión de Meseros (Max 10)</h3>
             <button id="btn-toggle-sin-meseros" class="btn btn-warning" style="margin-bottom:10px;" onclick="toggleModoSinMeseros()">🚫 Activar Modo Sin Meseros</button>
             <input type="text" id="mesero-nombre" placeholder="Nombre Mesero">
@@ -72,7 +68,6 @@
         </div>
     </div>
 
-    <!-- Modal Adjuntar Comprobante -->
     <div id="modal-subir-comprobante" class="modal hidden">
         <div class="modal-content">
             <h3>📸 Adjuntar Comprobante de Pago</h3>
@@ -83,32 +78,15 @@
         </div>
     </div>
 
-    <!-- Modal Genérico -->
     <div id="modal-generic" class="modal hidden">
         <div class="modal-content">
             <h3 id="modal-gen-title">Modal</h3>
             <div id="modal-gen-body"></div>
-            <button class="btn btn-danger" onclick="cerrarModalGeneric()">Cerrar</button>
+            <button class="btn btn-danger" style="margin-top:12px;" onclick="cerrarModalGeneric()">Cerrar</button>
         </div>
     </div>
 
-    <script>
-        async function realizarCorteYBorrarComprobantes() {
-            if (!db) return alert("Base de datos no conectada.");
-            if (!confirm("¿Deseas realizar el Corte del Día? Se cerrarán las cuentas activas y se borrarán los comprobantes de pago.")) return;
-
-            try {
-                await db.from('pedidos').update({ estado: 'cortado' }).in('estado', ['pendiente', 'cobrado']);
-                await db.from('comprobantes').delete().neq('id', 0);
-                alert("¡Corte del día realizado con éxito y comprobantes borrados!");
-                if (typeof cargarCajaAbierta === 'function') cargarCajaAbierta();
-            } catch (err) {
-                console.error(err);
-                alert("Corte realizado correctamente.");
-            }
-        }
-    </script>
-    <script src="js/supabase_config.js"></script>
-    <script src="js/admin.js"></script>
+    <script src="js/supabase_config.js?v=final2"></script>
+    <script src="js/admin.js?v=final_corte2"></script>
 </body>
 </html>
