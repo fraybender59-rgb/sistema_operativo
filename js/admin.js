@@ -574,3 +574,18 @@ async function borrarImgSlide(idx) {
     await setConfig('fondo_slideshow', JSON.stringify(imgs));
     cargarSlideshowPreview();
 }
+
+
+async function ejecutarResetGlobal() {
+    const pass = prompt('⚠️ PELIGRO: Esto vaciará la memoria caché y cerrará sesión en TODOS los dispositivos de los meseros, clientes y cocina. Quedarán como nuevos.\n\nIngresa la contraseña de ADMIN (ROXANA) para confirmar:');
+    
+    if (pass === currentAdminPass || pass === 'ROXANA') {
+        const nuevoReset = Date.now().toString();
+        if (_supabase) {
+            await _supabase.from('configuracion').upsert({ clave: 'reset_global', valor: nuevoReset });
+        }
+        alert("💣 SEÑAL ENVIADA.\n\nEn menos de 7 segundos, todos los dispositivos conectados borrarán su memoria internamente y se reiniciarán en blanco.");
+    } else {
+        alert('❌ Contraseña incorrecta. Formateo cancelado.');
+    }
+}
